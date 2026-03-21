@@ -1,0 +1,27 @@
+{
+  "name": "notsobot-tagscript-interpreter",
+  "version": "1.0.0",
+  "description": "The NotSoBot TagScript Interpreter, with the discord context and it's dependences contained. A CLI to interact in the context, and a compiler.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salagata/notsobot-tagscript-interpreter.git"
+  },
+  "keywords": [
+    "notsobot",
+    "notsobot-tagscript",
+    "tagscript",
+    "compiler",
+    "tagscript-compiler",
+    "tagscript-interpreter"
+  ],
+  "author": "salagata",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/salagata/notsobot-tagscript-interpreter/issues"
+  },
+  "homepage": "https://github.com/salagata/notsobot-tagscript-interpreter#readme"
+}
