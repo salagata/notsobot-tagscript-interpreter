@@ -12,7 +12,8 @@ program
   .description('NotSoBot TagScript Project Handler and TagScript Parser in a CLI ')
   .version('0.0.1');
 
-// nsb init
+// nsb init [name] 
+// -q, --quick : Answer yes to everything
 
 program.command('init')
   .description('Creates a new project in the file')
@@ -77,5 +78,54 @@ program.command('init')
       await fs.writeFile(projectFile, formatted);
     }
   });
+
+// nsb run <file> 
+// -a, --argument <argument> : Set an argument, simulating an argument being passed to the call (collector)
+// -f, --file <filePath> : Add an file as attachment, simulating passing attachments to the call (collector)
+// -o, --output-files <path> : If attachment are outputted, those attachments will be in this file, simulating the bot attaching files.
+// -ctx, --context <contextType> : Where is the tag being executed, "dm" for bot's direct messages, "guild" for a guild, "private" for private channels
+// -mc, --message-context <filePath> : Provide a message context to enable features that require a message context.
+// -uc, --user-context <filePath> : Provide an user context to enable features that require an user context.
+// -gmc, --guild-member-context <filePath> : Provide a member context to enable features that require a member context, not avaiable if context is not "guild".
+// -gc, --guild-context <filePath> : Provide a guild context to enable features that require a guild context, not avaiable if context is not "guild".
+// -cc, --channel-context <filePath> : Provide a channel context to enable features that require a channel context, if "dm" enabled, provide DM context, if "private" enabled, provide private then
+// -mhc, --message-history-context <filePath> : Provide a message history context to enable features that require a message history context
+// -tc, --tag-context <filePath> : Provide a tag context to enable features thar require a tag context
+// -st, --storage <filePath> : Provide storage context to enable features that require a storage context
+// -vt, --variables <filePath> : Optional pre-defined variables, util for test units
+// ! -dc, --discord-context <filePath> : Provide a discord context
+
+program.description('Run a file or the entry-point specified in the project config, with NotSoBot TagScript')
+  .argument("[file]","Name of the file, the entry-point specified in the project config if no specified",".")
+  .option('-a, --argument <argument>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .option('-f, --file <filePath>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .action(async (fileName,options) => {
+    let file = fileName;
+    let script; 
+    if(file == ".") {
+      try {
+        const project = JSON.parse(await fs.readFile("project.nsb.json"));
+        file = project.entrance;
+      } catch (err) {
+        throw err;  
+      }
+    }
+
+    let fileStat;
+    try {
+      fileStat = await fs.stat(file);
+
+      if(fileStat.isFile()) {
+        script = await fs.readFile(file);
+      } else if(fileStat.isDirectory()) {
+        file = path.join(file,"index.nsb");
+        script = await fs.readFile(file);
+      }
+    } catch (err) {
+      throw err;  
+    }
+
+    
+  })
 
 program.parseAsync(process.argv);
