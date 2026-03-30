@@ -7,6 +7,8 @@ const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 
+const parse = require("../compiler");
+
 program
   .name('nsb')
   .description('NotSoBot TagScript Project Handler and TagScript Parser in a CLI ')
@@ -93,12 +95,14 @@ program.command('init')
 // -tc, --tag-context <filePath> : Provide a tag context to enable features thar require a tag context
 // -st, --storage <filePath> : Provide storage context to enable features that require a storage context
 // -vt, --variables <filePath> : Optional pre-defined variables, util for test units
-// ! -dc, --discord-context <filePath> : Provide a discord context
+// -tl, --tag-limits <filePath> : Optional pre-defined tag limits
+// -no-tl, --no-tag-limits : Remove the Tag Limits
+// ! -dc, --discord-context <filePath> : Provide a discord context, if specified, message-context, user-context, guild-member-context, guild-context, channel-context, tag-context 
 
 program.description('Run a file or the entry-point specified in the project config, with NotSoBot TagScript')
   .argument("[file]","Name of the file, the entry-point specified in the project config if no specified",".")
-  .option('-a, --argument <argument>', 'Set an argument, simulating an argument being passed to the call (collector)')
-  .option('-f, --file <filePath>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .option('-a, --argument <arguments...>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .option('-f, --file <filePaths...>', 'Set an argument, simulating an argument being passed to the call (collector)')
   .action(async (fileName,options) => {
     let file = fileName;
     let script; 
@@ -114,18 +118,48 @@ program.description('Run a file or the entry-point specified in the project conf
     let fileStat;
     try {
       fileStat = await fs.stat(file);
-
+      
       if(fileStat.isFile()) {
-        script = await fs.readFile(file);
+        if(path.extname(file) == ".nsb") {
+          script = await fs.readFile(file,"utf-8");
+        } else {
+          script = await fs.readFile(file + ".nsb","utf-8");
+        }
       } else if(fileStat.isDirectory()) {
         file = path.join(file,"index.nsb");
-        script = await fs.readFile(file);
+        script = await fs.readFile(file, "utf-8");
+      } else {
+        throw new Error("Unsupported resource");
       }
     } catch (err) {
-      throw err;  
+      try {
+        file += ".nsb"
+        fileStat = await fs.stat(file);
+        if(fileStat.isFile()) {
+          script = await fs.readFile(file,"utf-8");
+        } else if(fileStat.isDirectory()) {
+          file = path.join(file,"index.nsb");
+          script = await fs.readFile(file, "utf-8");
+        } else {
+          throw new Error("Unsupported resource");
+        }
+      } catch (err2) {
+        throw err2;
+      }
     }
 
-    
+    const tagArguments = (options?.argument ?? []).map(a => '"' + a + '"').join(" ");
+    const tagFiles = options?.file ?? [];
+    // Testing purposes Only
+    console.log(parse({
+        guild: "Reisen's gang",
+    }, script, tagArguments, {}, {
+        mathWorker: {
+            working: false
+        }
+    },{
+        iterationsRemaining: 10
+    },true))
   })
 
 program.parseAsync(process.argv);
