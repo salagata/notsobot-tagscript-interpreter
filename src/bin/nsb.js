@@ -7,7 +7,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 
-const parse = require("../compiler");
+const parse = require("../../compiler");
 
 program
   .name('nsb')
