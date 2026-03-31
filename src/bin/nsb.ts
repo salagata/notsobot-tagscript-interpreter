@@ -1,13 +1,55 @@
 #!/usr/bin/env node
 
-const { Command } = require('commander');
+import { Command } from 'commander';
+
+import fs from 'fs/promises'
+import path from 'path';
+import readline from 'readline';
+
+import { parse } from '../compiler';
+
+import { Stats } from 'fs';
+
+
 const program = new Command();
 
-const fs = require("fs").promises;
-const path = require("path");
-const readline = require("readline");
+type AuthorName = string;
 
-const parse = require("../../compiler");
+type Version = string;
+
+type Link = string;
+
+type ProjectCommands = Record<string,string>;
+
+interface ProjectHostLinks {
+  link?: Link,
+  cdn?: Link,
+  home?: Link,
+  issues?: Link,
+  feedback?: Link,
+  help?: Link,
+  docs?: Link,
+  reference?: Link,
+  dashboard?: Link,
+  support?: Link,
+  [index: string]: string | undefined,
+}
+
+interface ProjectHost extends ProjectHostLinks {
+  service: string,
+  
+}
+
+interface ProjectStructure {
+    title: string,
+    version: Version,
+    description?: string,
+    entrance: string,
+    host: ProjectHost | {},
+    author: AuthorName,
+    license: string,
+    commands: ProjectCommands
+}
 
 program
   .name('nsb')
@@ -21,13 +63,13 @@ program.command('init')
   .description('Creates a new project in the file')
   .argument("[name]","Title of the project, name of the directory if ommited",path.basename(__dirname))
   .option('-q, --quick', 'Does the config quick, answering yes to everything')
-  .action( async (projectTitle,options) => {
-    const projectConfig = { 
+  .action( async (projectTitle: string,options: { quick: boolean }) => {
+    const projectConfig: ProjectStructure = { 
       "title": projectTitle, 
       "version": "1.0.0",
       "description":"",
       "entrance":"mansion.nsb",
-      "host":{},
+      "host": {},
       "author": "Unnamed",
       "license": "MIT",
       "commands":{
@@ -41,7 +83,7 @@ program.command('init')
         output: process.stdout
       })
 
-      function askQuestion(query) {
+      function askQuestion(query: string): Promise<string> {
         return new Promise((res,rej) => {
           rl.question(query,res);
         })
@@ -103,19 +145,22 @@ program.description('Run a file or the entry-point specified in the project conf
   .argument("[file]","Name of the file, the entry-point specified in the project config if no specified",".")
   .option('-a, --argument <arguments...>', 'Set an argument, simulating an argument being passed to the call (collector)')
   .option('-f, --file <filePaths...>', 'Set an argument, simulating an argument being passed to the call (collector)')
-  .action(async (fileName,options) => {
+  .action(async (fileName: string,options: {
+    argument: string[],
+    file: string[]
+  }) => {
     let file = fileName;
-    let script; 
+    let script: string; 
     if(file == ".") {
       try {
-        const project = JSON.parse(await fs.readFile("project.nsb.json"));
+        const project: ProjectStructure = JSON.parse(await fs.readFile("project.nsb.json","utf-8"));
         file = project.entrance;
       } catch (err) {
         throw err;  
       }
     }
 
-    let fileStat;
+    let fileStat: Stats;
     try {
       fileStat = await fs.stat(file);
       
