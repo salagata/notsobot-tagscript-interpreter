@@ -5,8 +5,10 @@
 // variables: Variables
 // tagContext: For now just the MathWorker
 // limits: Limits
-// shouldTrim: just asking if trim, MOSLTY USELESS
-type VariableValidValue = number | string | string[] | Record<string, any>;
+// shouldTrim: just asking if trim
+interface TagVariables {
+    [key: string]:  number | string | Array<string> | Record<string, any>,
+}
 
 interface TagLimits {
     iterationsRemaining: number,
@@ -14,14 +16,14 @@ interface TagLimits {
 
 interface TagResult {
     text: string,
-    variables: Record<string,VariableValidValue>,
+    variables: TagVariables,
     limits: Partial<TagLimits>,
     context: any,
 }
 export function parse(context: any,
     value: string,
     args: string = '',
-    variables: Record<string,VariableValidValue> = Object.create(null),
+    variables: TagVariables = Object.create(null),
     tagContext: any = Object.create(null),
     limits: Partial<TagLimits> = Object.create(null),
     shouldTrim: boolean = true) {
