@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import { parse } from '../tagscript/compiler';
+import { parse, TagLimitDefaults } from '../tagscript/compiler';
 
 import type { ProjectStructure } from './project.model';
 import type { Stats } from 'fs';
@@ -70,7 +70,5 @@ export async function runScript(fileName: string, options: TagRunOptions) {
         mathWorker: {
             working: false
         }
-    }, {
-        iterationsRemaining: 10
-    }, true))
+    }, TagLimitDefaults, true))
 }
