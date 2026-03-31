@@ -4,6 +4,7 @@
   "description": "The NotSoBot TagScript Interpreter, with the discord context and it's dependences contained. A CLI to interact in the context, and a compiler.",
   "main": "index.js",
   "scripts": {
+    "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

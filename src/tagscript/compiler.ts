@@ -6,7 +6,7 @@
 // tagContext: For now just the MathWorker
 // limits: Limits
 // shouldTrim: just asking if trim
-import type { TagLimits, TagVariables, TagResult,  } from "./tagscript.model"
+import type { TagLimits, TagVariables, TagResult } from "./tagscript.model"
 
 import { PrivateVariables, TagIfComparisons } from "./tagscript.constants";
 
@@ -54,6 +54,7 @@ export function parse(context: any,
     const tag: TagResult = {
         text:value,
         variables: {
+            [PrivateVariables.ITERATIONS_REMAINING]: limits["MAX_ITERATIONS"],
             ...variables
         },
         limits: limits,
@@ -72,25 +73,25 @@ export function parse(context: any,
     tag.text = tag.text.replace(regex,(match,firstGroup: string,secondGroup: string) => {
         switch (firstGroup) {
             case "set":
-                tag.limits.MAX_ITERATIONS!--
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 const [key, value] = secondGroup.split("|");
                 tag.variables[key] = value;
                 return "";
             case "get":
-                (tag.limits as any)[PrivateVariables.ITERATIONS_REMAINING]--;
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 return tag.variables[secondGroup];
             case "math":
-                (tag.limits as any)[PrivateVariables.ITERATIONS_REMAINING]--;
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 tag.context.mathWorker.working = true;
                 return eval(secondGroup);
             case "guild":
-                (tag.limits as any)[PrivateVariables.ITERATIONS_REMAINING]--;
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 return context.guild;
             case "args":
-                (tag.limits as any)[PrivateVariables.ITERATIONS_REMAINING]--;
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 return tag.variables["__argsString"];
             case "arg":
-                (tag.limits as any)[PrivateVariables.ITERATIONS_REMAINING]--;
+                (tag.variables as any)[PrivateVariables.ITERATIONS_REMAINING]--;
                 return (tag.variables["__args"] as string[])[Number(secondGroup)];
             case "note":
                 return '';

@@ -4,7 +4,6 @@ import path from 'path';
 import { parse, TagLimitDefaults } from '../tagscript/compiler';
 
 import type { ProjectStructure } from './project.model';
-import type { Stats } from 'fs';
 
 interface TagRunOptions {
     argument: string[],
