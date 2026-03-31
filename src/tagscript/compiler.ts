@@ -6,20 +6,8 @@
 // tagContext: For now just the MathWorker
 // limits: Limits
 // shouldTrim: just asking if trim
-interface TagVariables {
-    [key: string]:  number | string | Array<string> | Record<string, any>,
-}
+import type { TagLimits, TagVariables, TagResult} from "./tagscript.model"
 
-interface TagLimits {
-    iterationsRemaining: number,
-}
-
-interface TagResult {
-    text: string,
-    variables: TagVariables,
-    limits: Partial<TagLimits>,
-    context: any,
-}
 export function parse(context: any,
     value: string,
     args: string = '',
