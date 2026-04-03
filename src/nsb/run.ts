@@ -66,7 +66,7 @@ export async function runScript(fileName: string, options: TagRunOptions) {
     const tagArguments = (options?.argument ?? []).map(a => '"' + a + '"').join(" ");
     const tagFiles = options?.file ?? [];
     // Testing purposes Only
-    const tag = parse({
+    const tag = await parse({
         guild: "Reisen's gang",
     }, script, tagArguments, {}, {
         mathWorker: {

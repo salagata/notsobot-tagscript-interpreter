@@ -52,7 +52,7 @@ export interface TagLimits {
 
 export interface TagResult {
     text: string,
-    variables: Partial<TagVariables>,
+    variables: TagVariables,
     limits: Partial<TagLimits>,
     context: any,
 }
