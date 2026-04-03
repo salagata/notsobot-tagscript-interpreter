@@ -68,11 +68,7 @@ export async function runScript(fileName: string, options: TagRunOptions) {
     // Testing purposes Only
     const tag = await parse({
         guild: "Reisen's gang",
-    }, script, tagArguments, {}, {
-        mathWorker: {
-            working: false
-        }
-    }, TagLimitDefaults, true);
+    }, script, tagArguments);
     
     if(options.debug) {
         console.log(tag);

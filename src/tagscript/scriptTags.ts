@@ -1,9 +1,16 @@
-import { PRIVATE_VARIABLE_PREFIX, PrivateVariables, TagSettings, TagSymbols } from "./tagscript.constants"; 
-import { TagFunctions } from "./tagFunctions";
+import { PRIVATE_VARIABLE_PREFIX, PrivateVariables, TagIfComparisons, TagSettings, TagSymbols } from "./tagscript.constants"; 
+import { TagFunctions, TagFunctionsToString } from "./tagFunctions";
 
-import { normalizeTagResults, parse, split } from "./compiler";
+import { normalizeTagResults, parse, split, TAG_IF_COMPARISONS } from "./compiler";
 import { TagResult } from "./tagscript.model";
 import { TagExitError } from "./exceptions";
+import * as Parameters from "./parameters"
+
+import MiniSearch from "minisearch";
+import * as cheerio from 'cheerio';
+import vm from 'vm'
+
+import { bigIntGenerateBetween, bigIntMax, bigIntMin, convertToBigIntFloats, MLDiffusionModels, randomFromArray, TagGenerationModels, textToBoolean, traverseJSON } from "./utils";
 
 type ScriptTagStruct = Readonly<Record<string, (context: any, arg: string, tag: TagResult) => Promise<boolean>> | {
   _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
@@ -2503,7 +2510,7 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
   [TagFunctions.MATH]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {math:5+5}
 
-    // TESTING PURPOSES ONLY
+    // TESTING PURPOSES ONLY, NO USE IN DEVELOPMENT
 
     tag.text += eval(arg);
     // const equation = arg.trim();
@@ -3981,7 +3988,7 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
           if (value in TagGenerationModels) {
             tag.variables[PrivateVariables.SETTINGS][setting] = value as TagGenerationModels;
           } else {
-            throw new Error(`AI Model must be one of: (${Object.values(TagGenerationModels).map((x) => Markup.codestring(x)).join(', ')})`);
+            throw new Error(`AI Model must be one of: (${Object.values(TagGenerationModels).join(', ')})`);
           }
         } else {
           delete tag.variables[setting];
@@ -3992,8 +3999,8 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
           value = value.toLowerCase();
 
           let parsedValue: any = null;
-          for (let tagFunction of [TagFunctions.SEARCH_YOUTUBE]) {
-            if (TagFunctionsToString[tagFunction].includes(value)) {
+          for (let tagFunction of [/*TagFunctions.SEARCH_YOUTUBE*/]) {
+            if ((TagFunctionsToString[tagFunction] as string).includes(value)) {
               parsedValue = tagFunction;
               break;
             }
@@ -4011,8 +4018,8 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
           value = value.toLowerCase();
 
           let parsedValue: any = null;
-          for (let tagFunction of [TagFunctions.MEDIA_IMAGE_IMAGINE, TagFunctions.SEARCH_DUCKDUCKGO_IMAGES, TagFunctions.SEARCH_GOOGLE_IMAGES]) {
-            if (TagFunctionsToString[tagFunction].includes(value)) {
+          for (let tagFunction of [/*TagFunctions.MEDIA_IMAGE_IMAGINE, TagFunctions.SEARCH_DUCKDUCKGO_IMAGES, TagFunctions.SEARCH_GOOGLE_IMAGES*/]) {
+            if ((TagFunctionsToString[tagFunction] as string).includes(value)) {
               parsedValue = tagFunction;
               break;
             }
@@ -4038,7 +4045,7 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
           if (value in MLDiffusionModels) {
             tag.variables[PrivateVariables.SETTINGS][setting] = value as MLDiffusionModels;
           } else {
-            throw new Error(`ML Imagine Model must be one of: (${Object.values(MLDiffusionModels).map((x) => Markup.codestring(x)).join(', ')})`);
+            throw new Error(`ML Imagine Model must be one of: (${Object.values(MLDiffusionModels).join(', ')})`);
           }
         } else {
           delete tag.variables[setting];
@@ -4142,158 +4149,158 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
   // TODO: a wrapper for Markup features lol
-  [TagFunctions.STRING_MARKUP_BOLD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupbold:text}
+  // [TagFunctions.STRING_MARKUP_BOLD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupbold:text}
 
-    tag.text += Markup.bold(arg);
-    return true;
-  },
+  //   tag.text += Markup.bold(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_CODEBLOCK]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupcodeblock:text}
+  // [TagFunctions.STRING_MARKUP_CODEBLOCK]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupcodeblock:text}
   
-    tag.text += Markup.codeblock(arg);
-    return true;
-  },
+  //   tag.text += Markup.codeblock(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_CODESTRING]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupcodestring:text}
+  // [TagFunctions.STRING_MARKUP_CODESTRING]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupcodestring:text}
 
-    tag.text += Markup.codestring(arg);
-    return true;
-  },
+  //   tag.text += Markup.codestring(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_ESCAPE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupescape:text}
+  // [TagFunctions.STRING_MARKUP_ESCAPE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupescape:text}
 
-    tag.text += Markup.escape.all(arg);
-    return true;
-  },
+  //   tag.text += Markup.escape.all(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_HEADER_BIG]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupheaderbig:text}
+  // [TagFunctions.STRING_MARKUP_HEADER_BIG]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupheaderbig:text}
 
-    tag.text += Markup.headerBig(arg);
-    return true;
-  },
+  //   tag.text += Markup.headerBig(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_HEADER_MEDIUM]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupheadermedium:text}
+  // [TagFunctions.STRING_MARKUP_HEADER_MEDIUM]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupheadermedium:text}
 
-    tag.text += Markup.headerMedium(arg);
-    return true;
-  },
+  //   tag.text += Markup.headerMedium(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_HEADER_SMALL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupheadersmall:text}
+  // [TagFunctions.STRING_MARKUP_HEADER_SMALL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupheadersmall:text}
 
-    tag.text += Markup.headerSmall(arg);
-    return true;
-  },
+  //   tag.text += Markup.headerSmall(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_ITALICS]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupitalics:text}
+  // [TagFunctions.STRING_MARKUP_ITALICS]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupitalics:text}
   
-    tag.text += Markup.italics(arg);
-    return true;
-  },
+  //   tag.text += Markup.italics(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_LIST_DOTTED]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markuplistdotted:text|text|...}
+  // [TagFunctions.STRING_MARKUP_LIST_DOTTED]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markuplistdotted:text|text|...}
 
-    tag.text += split(arg).map((x) => {
-      return Markup.list(x);
-    }).join('\n');
+  //   tag.text += split(arg).map((x) => {
+  //     return Markup.list(x);
+  //   }).join('\n');
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_LIST_NUMBERED]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markuplistnumbered:text|text|...}
+  // [TagFunctions.STRING_MARKUP_LIST_NUMBERED]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markuplistnumbered:text|text|...}
 
-    tag.text += split(arg).map((x, i) => {
-      return Markup.list(x, {ordered: i});
-    }).join('\n');
+  //   tag.text += split(arg).map((x, i) => {
+  //     return Markup.list(x, {ordered: i});
+  //   }).join('\n');
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_QUOTE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupquote:text}
+  // [TagFunctions.STRING_MARKUP_QUOTE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupquote:text}
 
-    tag.text += Markup.quote(arg);
-    return true;
-  },
+  //   tag.text += Markup.quote(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_SPOILER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupspoiler:text}
+  // [TagFunctions.STRING_MARKUP_SPOILER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupspoiler:text}
 
-    tag.text += Markup.spoiler(arg);
-    return true;
-  },
+  //   tag.text += Markup.spoiler(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_STRIKE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupstrike:text}
+  // [TagFunctions.STRING_MARKUP_STRIKE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupstrike:text}
 
-    tag.text += Markup.strike(arg);
-    return true;
-  },
+  //   tag.text += Markup.strike(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_SUBTEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupsubtext:text}
+  // [TagFunctions.STRING_MARKUP_SUBTEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupsubtext:text}
 
-    tag.text += Markup.subtext(arg);
-    return true;
-  },
+  //   tag.text += Markup.subtext(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_TIME]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markuptime:text?|format?}
+  // [TagFunctions.STRING_MARKUP_TIME]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markuptime:text?|format?}
 
-    let format: MarkupTimestampStyles | undefined;
-    let timestamp: string = '';
-    if (arg.length) {
-      if (arg in MarkupTimestampStyles) {
-        // do it
-      } else if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-        const parts = split(arg);
+  //   let format: MarkupTimestampStyles | undefined;
+  //   let timestamp: string = '';
+  //   if (arg.length) {
+  //     if (arg in MarkupTimestampStyles) {
+  //       // do it
+  //     } else if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //       const parts = split(arg);
 
-        const suspectedFormat = parts.pop()!;
-        if (suspectedFormat in MarkupTimestampStyles) {
+  //       const suspectedFormat = parts.pop()!;
+  //       if (suspectedFormat in MarkupTimestampStyles) {
           
-        } else {
-          parts.push(suspectedFormat);
-        }
-        timestamp = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-      } else {
-        timestamp = arg;
-      }
-    } else {
-      timestamp = String(Date.now());
-    }
+  //       } else {
+  //         parts.push(suspectedFormat);
+  //       }
+  //       timestamp = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //     } else {
+  //       timestamp = arg;
+  //     }
+  //   } else {
+  //     timestamp = String(Date.now());
+  //   }
 
-    if (format && format.length !== 1) {
-      format = (MarkupTimestampStyles as any)[format] as MarkupTimestampStyles;
-    }
+  //   if (format && format.length !== 1) {
+  //     format = (MarkupTimestampStyles as any)[format] as MarkupTimestampStyles;
+  //   }
 
-    tag.text += Markup.timestamp(timestamp, format);
-    return true;
-  },
+  //   tag.text += Markup.timestamp(timestamp, format);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_UNDERLINE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupunderline:text}
+  // [TagFunctions.STRING_MARKUP_UNDERLINE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupunderline:text}
 
-    tag.text += Markup.underline(arg);
-    return true;
-  },
+  //   tag.text += Markup.underline(arg);
+  //   return true;
+  // },
 
-  [TagFunctions.STRING_MARKUP_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {markupurl:text|url|comment?}
+  // [TagFunctions.STRING_MARKUP_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {markupurl:text|url|comment?}
 
-    let [ text, url, comment ] = split(arg, 3);
+  //   let [ text, url, comment ] = split(arg, 3);
 
-    tag.text += Markup.url(text, url, comment);
-    return true;
-  },
+  //   tag.text += Markup.url(text, url, comment);
+  //   return true;
+  // },
 
   [TagFunctions.STRING_REPEAT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {repeat:50|lol}
@@ -4405,9 +4412,9 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     if (endText !== undefined) {
       const parsed = await parse(context, endText, '', tag.variables, tag.context, tag.limits);
       end = parseInt(parsed.text.trim());
-      for (let file of parsed.files) {
-        tag.files.push(file);
-      }
+      // for (let file of parsed.files) {
+      //   tag.files.push(file);
+      // }
       if (isNaN(end)) {
         return false;
       }
@@ -4672,15 +4679,15 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.TIME_UNIX_FROM_SNOWFLAKE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {unixsnowflake:SNOWFLAKE}
+  // [TagFunctions.TIME_UNIX_FROM_SNOWFLAKE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {unixsnowflake:SNOWFLAKE}
 
-    if (arg) {
-      tag.text += Snowflake.timestamp(arg);
-    }
+  //   if (arg) {
+  //     tag.text += Snowflake.timestamp(arg);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.TIME_UNIX_SECONDS]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {unixs}
