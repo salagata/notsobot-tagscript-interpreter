@@ -13,6 +13,7 @@ import * as Parameters from './parameters';
 
 import { TagFunctions, TagFunctionsToString } from './tagFunctions';
 import { ScriptTags } from './scriptTags';
+import { TagExitError } from "./exceptions";
 
 export const TAG_IF_COMPARISONS = [
   TagIfComparisons.EQUAL,
@@ -430,10 +431,10 @@ export async function parse(
         if (error.isSilent) {
           tag.text += error.message;
         } else {
-          tag.components = null;
-          tag.embeds = (tag.embeds.length) ? [] : tag.embeds;
-          tag.files = (tag.files.length) ? [] : tag.files;
-          tag.pages = (tag.pages.length) ? [] : tag.pages;
+          // tag.components = null;
+          // tag.embeds = (tag.embeds.length) ? [] : tag.embeds;
+          // tag.files = (tag.files.length) ? [] : tag.files;
+          // tag.pages = (tag.pages.length) ? [] : tag.pages;
           tag.text = error.message || 'Tag Exited';
         }
         scriptBuffer = '';
@@ -678,7 +679,7 @@ function parseInnerScript(value: string, shouldTrim: boolean = true): [string, s
 }
 
 
-function normalizeTagResults(main: TagResult, other: TagResult, content: boolean = true): void {
+export function normalizeTagResults(main: TagResult, other: TagResult, content: boolean = true): void {
   if (content) {
     main.text += other.text;
   }

@@ -1,8 +1,9 @@
-import { PrivateVariables } from "./tagscript.constants"; 
+import { PrivateVariables, TagSymbols } from "./tagscript.constants"; 
 import { TagFunctions } from "./tagFunctions";
 
-import { split } from "./compiler";
+import { normalizeTagResults, parse, split } from "./compiler";
 import { TagResult } from "./tagscript.model";
+import { TagExitError } from "./exceptions";
 
 type ScriptTagStruct = Readonly<Record<string, (context: any, arg: string, tag: TagResult) => Promise<boolean>> | {
   _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
@@ -1309,107 +1310,107 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {guild}
-    // todo: {guild:178313653177548800}
+  // [TagFunctions.GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {guild}
+  //   // todo: {guild:178313653177548800}
 
-    if (context.guild) {
-      tag.text += context.guild.name;
-    } else {
-      tag.text += 'Direct Message';
-    }
-    return true;
-  },
+  //   if (context.guild) {
+  //     tag.text += context.guild.name;
+  //   } else {
+  //     tag.text += 'Direct Message';
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.GUILD_COUNT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {guildcount}
-    // todo: {guildcount:178313653177548800}
+  // [TagFunctions.GUILD_COUNT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {guildcount}
+  //   // todo: {guildcount:178313653177548800}
 
-    if (context.guild) {
-      tag.text += context.guild.memberCount;
-    } else {
-      tag.text += '2';
-    }
-    return true;
-  },
+  //   if (context.guild) {
+  //     tag.text += context.guild.memberCount;
+  //   } else {
+  //     tag.text += '2';
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.GUILD_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {guildid}
-    // todo: {guildid:178313653177548800} (useless lmao)
+  // [TagFunctions.GUILD_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {guildid}
+  //   // todo: {guildid:178313653177548800} (useless lmao)
 
-    tag.text += (context.guildId) ? context.guildId : '0';
-    return true;
-  },
+  //   tag.text += (context.guildId) ? context.guildId : '0';
+  //   return true;
+  // },
 
-  [TagFunctions.HASTEBIN]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {hastebin:data}
+  // [TagFunctions.HASTEBIN]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {hastebin:data}
 
-    return false;
-  },
+  //   return false;
+  // },
 
-  [TagFunctions.IMAGE_INTERROGATE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // interrogate an image
-    // {interrogate:cake}
+  // [TagFunctions.IMAGE_INTERROGATE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // interrogate an image
+  //   // {interrogate:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    let url = await lastImageUrl(arg.trim(), context);
-    if (!url) {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        const textCache = tag.text;
+  //   let url = await lastImageUrl(arg.trim(), context);
+  //   if (!url) {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       const textCache = tag.text;
     
-        tag.text = '';
-        await ScriptTags[fallbackFunction](context, arg, tag);
-        url = tag.text;
-        tag.text = textCache;
-      }
-    }
+  //       tag.text = '';
+  //       await ScriptTags[fallbackFunction](context, arg, tag);
+  //       url = tag.text;
+  //       tag.text = textCache;
+  //     }
+  //   }
 
-    if (url) {
-      try {
-        const response = await utilitiesMLInterrogate(context, {url});
-        tag.text += response.prompt;
-      } catch(error) {
+  //   if (url) {
+  //     try {
+  //       const response = await utilitiesMLInterrogate(context, {url});
+  //       tag.text += response.prompt;
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.IMAGE_OCR]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // ocr an image
-    // {ocr:cake}
+  // [TagFunctions.IMAGE_OCR]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // ocr an image
+  //   // {ocr:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    let url = await lastImageUrl(arg.trim(), context);
-    if (!url) {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        const textCache = tag.text;
+  //   let url = await lastImageUrl(arg.trim(), context);
+  //   if (!url) {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       const textCache = tag.text;
     
-        tag.text = '';
-        await ScriptTags[fallbackFunction](context, arg, tag);
-        url = tag.text;
-        tag.text = textCache;
-      }
-    }
+  //       tag.text = '';
+  //       await ScriptTags[fallbackFunction](context, arg, tag);
+  //       url = tag.text;
+  //       tag.text = textCache;
+  //     }
+  //   }
 
-    if (url) {
-      try {
-        const { annotation } = await googleContentVisionOCR(context, {url});
-        if (annotation) {
-          tag.text += annotation.description;
-        }
-      } catch(error) {
+  //   if (url) {
+  //     try {
+  //       const { annotation } = await googleContentVisionOCR(context, {url});
+  //       if (annotation) {
+  //         tag.text += annotation.description;
+  //       }
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.INSERT_BRACKET_LEFT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {bracketleft}
