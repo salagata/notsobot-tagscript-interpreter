@@ -45,6 +45,8 @@ program.description('Run a file or the entry-point specified in the project conf
   .argument("[file]","Name of the file, the entry-point specified in the project config if no specified",".")
   .option('-a, --argument <arguments...>', 'Set an argument, simulating an argument being passed to the call (collector)')
   .option('-f, --file <filePaths...>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .option('--debug',"For debugging, shows the Object Tag Result instead of rendering it")
+  .option('--no-markup',"Disable Markup Options")
   .action(runScript)
 
 program.parseAsync(process.argv);

@@ -1,6 +1,7 @@
 index.txt
 parse.txt 
 example/**
+cliExample.ts
 
 # Logs
 logs

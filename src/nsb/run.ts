@@ -2,12 +2,15 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { parse, TagLimitDefaults } from '../tagscript/compiler';
+import { renderTagResult } from "../renderer/renderer";
 
 import type { ProjectStructure } from './project.model';
 
 interface TagRunOptions {
     argument: string[],
     file: string[],
+    debug: boolean,
+    markup: boolean,
 }
 
 async function getProjectFileObject(): Promise<ProjectStructure> {
@@ -63,11 +66,18 @@ export async function runScript(fileName: string, options: TagRunOptions) {
     const tagArguments = (options?.argument ?? []).map(a => '"' + a + '"').join(" ");
     const tagFiles = options?.file ?? [];
     // Testing purposes Only
-    console.log(parse({
+    const tag = parse({
         guild: "Reisen's gang",
     }, script, tagArguments, {}, {
         mathWorker: {
             working: false
         }
-    }, TagLimitDefaults, true))
+    }, TagLimitDefaults, true);
+    
+    if(options.debug) {
+        console.log(tag);
+    } else {
+        renderTagResult(tag,options.markup);
+    }
+
 }
