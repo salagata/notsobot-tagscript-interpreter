@@ -68,3 +68,13 @@ export enum TagSettings {
   ML_IMAGINE_DO_NOT_ERROR = 'ML_IMAGINE_DO_NOT_ERROR',
   ML_IMAGINE_MODEL = 'ML_IMAGINE_MODEL',
 }
+
+export const PRIVATE_VARIABLE_PREFIX = '__';
+
+export const ATTACHMENT_URL_REGEX = /(https?:\/\/(?:media\.discordapp\.net|cdn.discordapp.com)\/attachments\/[0-9]*\/[0-9]*\/[A-Za-z0-9_.-]*(?:\?[a-zA-Z0-9&=]*)?)/g;
+export const MATH_NON_NUMERIC_REGEX = /[^+\-*\/()0-9.n><&]/g;
+export const SCRIPT_REGEX = /\{((?:(?!:)(?:.|\s))*):([\s\S]+)\}/;
+export const URL_FILE_REPLACEMENT_REGEX = /FILE_([0-9]+)(_COPY)?/g;
+
+export const REGEX_ARGUMENT_SPLITTER = new RegExp(`(?<!\\\\)[${TagSymbols.SPLITTER_ARGUMENT}]`, 'g');
+export const REGEX_ARGUMENT_SPLITTER_ESCAPE_REPLACEMENT = new RegExp(`\\\\\\${TagSymbols.SPLITTER_ARGUMENT}`, 'g');

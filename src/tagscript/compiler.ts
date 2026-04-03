@@ -8,7 +8,7 @@
 // shouldTrim: just asking if trim
 import type { TagLimits, TagVariables, TagResult } from "./tagscript.model"
 
-import { PrivateVariables, TagIfComparisons, TagSettings, TagSymbols } from "./tagscript.constants";
+import { ATTACHMENT_URL_REGEX, PrivateVariables, REGEX_ARGUMENT_SPLITTER, REGEX_ARGUMENT_SPLITTER_ESCAPE_REPLACEMENT, TagIfComparisons, TagSettings, TagSymbols } from "./tagscript.constants";
 import * as Parameters from './parameters';
 
 import { TagFunctions, TagFunctionsToString } from './tagFunctions';
@@ -170,53 +170,65 @@ export async function parse(
     (variables as any)[PrivateVariables.TAG_EXECUTIONS] = 0;
   }
 
-  let replacement: string | null = null;
+  // let replacement: string | null = null;
   if (isFirstParse) {
     // go through the text and replace
+    // DON'T DO THIS BECAUSE WE DON'T HAVE THAT SERVERS (yet)1
+    // And because this works with files duh
+    // const expired = new Set();
+    // // go through them all and see if they are expired, if so then replace
+    // for (let match of value.matchAll(ATTACHMENT_URL_REGEX)) {
+    //   const isValid = isValidAttachmentUrl(match[0]);
+    //   if (!isValidAttachmentUrl(match[0])) {
+    //     expired.add(match[0]);
+    //   }
+    // }
 
-    const expired = new Set();
-    // go through them all and see if they are expired, if so then replace
-    for (let match of value.matchAll(ATTACHMENT_URL_REGEX)) {
-      const isValid = isValidAttachmentUrl(match[0]);
-      if (!isValidAttachmentUrl(match[0])) {
-        expired.add(match[0]);
-      }
-    }
+    // for (let match of args.matchAll(ATTACHMENT_URL_REGEX)) {
+    //   const isValid = isValidAttachmentUrl(match[0]);
+    //   if (!isValidAttachmentUrl(match[0])) {
+    //     expired.add(match[0]);
+    //   }
+    // }
 
-    for (let match of args.matchAll(ATTACHMENT_URL_REGEX)) {
-      const isValid = isValidAttachmentUrl(match[0]);
-      if (!isValidAttachmentUrl(match[0])) {
-        expired.add(match[0]);
-      }
-    }
-
-    const oldValue = value;
-    if (expired.size && expired.size <= 50) {
-      const { refreshed_urls: refreshedUrls } = await context.rest.request({
-        body: {attachment_urls: Array.from(expired)},
-        route: {
-          method: 'post',
-          path: '/attachments/refresh-urls',
-        },
-      });
-      for (let item of refreshedUrls) {
-        value = value.replace(item.original, item.refreshed);
-        args = args.replace(item.original, item.refreshed);
-      }
-      if (oldValue !== value) {
-        replacement = value;
-      }
+    // const oldValue = value;
+    // if (expired.size && expired.size <= 50) {
+    //   const { refreshed_urls: refreshedUrls } = await context.rest.request({
+    //     body: {attachment_urls: Array.from(expired)},
+    //     route: {
+    //       method: 'post',
+    //       path: '/attachments/refresh-urls',
+    //     },
+    //   });
+    //   for (let item of refreshedUrls) {
+    //     value = value.replace(item.original, item.refreshed);
+    //     args = args.replace(item.original, item.refreshed);
+    //   }
+    //   if (oldValue !== value) {
+    //     replacement = value;
+    //   }
+    // Only this for now
       if ((variables as any)[PrivateVariables.ARGS_STRING] !== args) {
         (variables as any)[PrivateVariables.ARGS_STRING] = args;
         (variables as any)[PrivateVariables.ARGS] = Parameters.stringArguments(args);
       }
     }
-  }
+  // }
 
-  const tag: TagResult = {components: null, context: tagContext, embeds: [], files: [], limits: tagLimits, pages: [], replacement, text: '', variables};
+  const tag: TagResult = {
+//    components: null, 
+    context: tagContext, 
+//    embeds: [], 
+//    files: [], 
+    limits: tagLimits, 
+//    pages: [], replacement, 
+    text: '', 
+    variables: variables
+  };
   tag.variables[PrivateVariables.ITERATIONS_REMAINING]--;
 
-  const maxFileSize = context.maxAttachmentSize;
+  // This is not discord duh (potential changes)
+  const maxFileSize = Infinity // context.maxAttachmentSize;
 
   let depth = 0;
   let scriptBuffer = '';
@@ -365,7 +377,7 @@ export async function parse(
               }
             } else {
               // check the other tags now
-              let codeLanguage = getCodeLanguage(scriptName);
+              let codeLanguage = getCodeLanguage(scriptName); 
               if (codeLanguage) {
                 // check code languages first to stop {tag} parsing
                 tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 1;
@@ -395,7 +407,7 @@ export async function parse(
                 for (let TAG_FUNCTION of Object.values(TagFunctions)) {
                   if (TagFunctionsToString[TAG_FUNCTION].includes(scriptName)) {
                     found = true;
-                    const wasValid = await ScriptTags[TAG_FUNCTION](context, arg, tag);
+                    const wasValid = await (ScriptTags[TAG_FUNCTION] as any)(context, arg, tag);
                     if (!wasValid) {
                       tag.text += scriptBuffer;
                     }
@@ -509,45 +521,49 @@ export function increaseTagExecutions(tag: TagResult, amount: number = 1) {
   }
 }
 
-
-export function checkTagComponentsLimit(components: TagResultComponents | null) {
-  if (components && components.components.length) {
-    let actionRows: number = 0;
-    let buttons: number = 0;
-    for (let component of components.components) {
-      switch (component.type) {
-        case MessageComponentTypes.ACTION_ROW: {
-          actionRows++;
-          if (buttons) {
-            throw new Error('Only support ActionRows or Buttons, not both for now');
-          }
-          /*
-          for (let x of component.components) {
-            if (25 <= buttons) {
-              throw new Error('TagScript only supports up to 25 buttons');
-            }
-            switch (x.type) {
-              case MessageComponentTypes.BUTTON: buttons++; break;
-            }
-          }
-          */
-        }; break;
-        case MessageComponentTypes.BUTTON: {
-          buttons++;
-          if (actionRows) {
-            throw new Error('Only support ActionRows or Buttons, not both for now');
-          }
-        }; break;
-      }
-      if (5 < actionRows) {
-        throw new Error('TagScript only supports up to 5 action rows');
-      }
-      if (25 < buttons) {
-        throw new Error('TagScript only supports up to 25 buttons');
-      }
-    }
-  }
+export function checkTagComponentsLimit(components: any) {
+  // does nothing
+  return;
 }
+
+// export function checkTagComponentsLimit(components: TagResultComponents | null) {
+//   if (components && components.components.length) {
+//     let actionRows: number = 0;
+//     let buttons: number = 0;
+//     for (let component of components.components) {
+//       switch (component.type) {
+//         case MessageComponentTypes.ACTION_ROW: {
+//           actionRows++;
+//           if (buttons) {
+//             throw new Error('Only support ActionRows or Buttons, not both for now');
+//           }
+//           /*
+//           for (let x of component.components) {
+//             if (25 <= buttons) {
+//               throw new Error('TagScript only supports up to 25 buttons');
+//             }
+//             switch (x.type) {
+//               case MessageComponentTypes.BUTTON: buttons++; break;
+//             }
+//           }
+//           */
+//         }; break;
+//         case MessageComponentTypes.BUTTON: {
+//           buttons++;
+//           if (actionRows) {
+//             throw new Error('Only support ActionRows or Buttons, not both for now');
+//           }
+//         }; break;
+//       }
+//       if (5 < actionRows) {
+//         throw new Error('TagScript only supports up to 5 action rows');
+//       }
+//       if (25 < buttons) {
+//         throw new Error('TagScript only supports up to 25 buttons');
+//       }
+//     }
+//   }
+// }
 
 
 export function resetTagLimits(tag: TagResult) {
@@ -667,37 +683,39 @@ function normalizeTagResults(main: TagResult, other: TagResult, content: boolean
     main.text += other.text;
   }
 
-  if (other.components) {
-    if (main.components) {
-      main.components.components = [...main.components.components, ...other.components.components];
-      checkTagComponentsLimit(main.components);
-      if (other.components.onTimeout) {
-        main.components.onTimeout = other.components.onTimeout;
-      }
-    } else {
-      main.components = other.components;
-    }
-  }
+  // not supported for now
+  // if (other.components) {
+  //   if (main.components) {
+  //     main.components.components = [...main.components.components, ...other.components.components];
+  //     checkTagComponentsLimit(main.components);
+  //     if (other.components.onTimeout) {
+  //       main.components.onTimeout = other.components.onTimeout;
+  //     }
+  //   } else {
+  //     main.components = other.components;
+  //   }
+  // }
 
-  if (main.limits.MAX_EMBEDS < main.embeds.length + other.embeds.length) {
-    throw new Error(`Embeds surpassed max embeds length of ${main.limits.MAX_EMBEDS}`);
-  }
-  for (let embed of other.embeds) {
-    main.embeds.push(embed);
-  }
+  // not supported for now
+  // if (main.limits.MAX_EMBEDS < main.embeds.length + other.embeds.length) {
+  //   throw new Error(`Embeds surpassed max embeds length of ${main.limits.MAX_EMBEDS}`);
+  // }
+  // for (let embed of other.embeds) {
+  //   main.embeds.push(embed);
+  // }
 
-  if (main.limits.MAX_ATTACHMENTS < main.files.length + other.files.length) {
-    throw new Error(`Attachments surpassed max attachments length of ${main.limits.MAX_ATTACHMENTS}`);
-  }
-  for (let file of other.files) {
-    main.files.push(file);
-  }
+  // if (main.limits.MAX_ATTACHMENTS < main.files.length + other.files.length) {
+  //   throw new Error(`Attachments surpassed max attachments length of ${main.limits.MAX_ATTACHMENTS}`);
+  // }
+  // for (let file of other.files) {
+  //   main.files.push(file);
+  // }
 
-  if (main.limits.MAX_PAGES < main.pages.length + other.pages.length) {
-    throw new Error(`Pages surpassed max page length of ${main.limits.MAX_PAGES}`);
-  }
-  for (let page of other.pages) {
-    main.pages.push(page);
-  }
+  // if (main.limits.MAX_PAGES < main.pages.length + other.pages.length) {
+  //   throw new Error(`Pages surpassed max page length of ${main.limits.MAX_PAGES}`);
+  // }
+  // for (let page of other.pages) {
+  //   main.pages.push(page);
+  // }
 }
 

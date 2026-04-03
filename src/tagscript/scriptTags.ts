@@ -4,524 +4,526 @@ import { TagFunctions } from "./tagFunctions";
 import { split } from "./compiler";
 import { TagResult } from "./tagscript.model";
 
-
+type ScriptTagStruct = Readonly<Record<string, (context: any, arg: string, tag: TagResult) => Promise<boolean>> | {
+  _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
+}>
 
 type DiscordContextLike = any;
 
-export const ScriptTags = Object.freeze({
-//   _code: async (context: DiscordContextLike, arg: string, tag: TagResult, language: CodeLanguages, version?: string | null): Promise<boolean> => {
-//     // {python:code}
+export const ScriptTags: ScriptTagStruct = Object.freeze({
+  _code: async (context: DiscordContextLike, arg: string, tag: TagResult, language: string, version?: string | null): Promise<boolean> => {
+    // // {js:code}
 
-//     arg = arg.trim();
-//     if (arg.startsWith('```') && arg.endsWith('```')) {
-//       const { language, text } = Parameters.codeblock(arg);
-//       arg = text;
-//     }
+    // arg = arg.trim();
+    // if (arg.startsWith('```') && arg.endsWith('```')) {
+    //   const { language, text } = Parameters.codeblock(arg);
+    //   arg = text;
+    // }
 
-//     if (!arg) {
-//       return true;
-//     }
+    // if (!arg) {
+    //   return true;
+    // }
 
-//     increaseNetworkRequests(tag);
+    // increaseNetworkRequests(tag);
 
-//     const storage: {
-//       channel: Record<string, string>,
-//       global: Record<string, string>,
-//       server: Record<string, string>,
-//       user: Record<string, string>,
-//     } = {channel: {}, global: {}, server: {}, user: {}};
+    // const storage: {
+    //   channel: Record<string, string>,
+    //   global: Record<string, string>,
+    //   server: Record<string, string>,
+    //   user: Record<string, string>,
+    // } = {channel: {}, global: {}, server: {}, user: {}};
 
-//     let tagId: string | null = null;
-//     if (context.metadata && context.metadata.tag) {
-//       tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-//     }
+    // let tagId: string | null = null;
+    // if (context.metadata && context.metadata.tag) {
+    //   tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+    // }
 
-//     if (tagId) {
-//       const response = await fetchTagVariables(context, tagId, {
-//         channelId: context.channelId!,
-//         guildId: context.guildId,
-//         userId: context.userId,
-//       });
-//       for (let key in Object.keys(response)) {
-//         const storageType = parseInt(key) as TagVariableStorageTypes;
-//         switch (storageType) {
-//           case TagVariableStorageTypes.CHANNEL: {
-//             Object.assign(storage.channel, response[storageType]);
-//           }; break;
-//           case TagVariableStorageTypes.GUILD: {
-//             Object.assign(storage.server, response[storageType]);
-//           }; break;
-//           case TagVariableStorageTypes.USER: {
-//             Object.assign(storage.user, response[storageType]);
-//           }; break;
-//           case TagVariableStorageTypes.GLOBAL: {
-//             Object.assign(storage.global, response[storageType]);
-//           }; break;
-//         }
-//       }
-//     }
+    // if (tagId) {
+    //   const response = await fetchTagVariables(context, tagId, {
+    //     channelId: context.channelId!,
+    //     guildId: context.guildId,
+    //     userId: context.userId,
+    //   });
+    //   for (let key in Object.keys(response)) {
+    //     const storageType = parseInt(key) as TagVariableStorageTypes;
+    //     switch (storageType) {
+    //       case TagVariableStorageTypes.CHANNEL: {
+    //         Object.assign(storage.channel, response[storageType]);
+    //       }; break;
+    //       case TagVariableStorageTypes.GUILD: {
+    //         Object.assign(storage.server, response[storageType]);
+    //       }; break;
+    //       case TagVariableStorageTypes.USER: {
+    //         Object.assign(storage.user, response[storageType]);
+    //       }; break;
+    //       case TagVariableStorageTypes.GLOBAL: {
+    //         Object.assign(storage.global, response[storageType]);
+    //       }; break;
+    //     }
+    //   }
+    // }
 
-//     const variables = Object.assign({
-//       [PrivateVariables.FILES]: tag.files.map((file) => {
-//         return {description: file.description, filename: file.filename};
-//       }),
-//     }, tag.variables, {
-//       [PrivateVariables.RESULTS]: Object.assign({}, tag.variables[PrivateVariables.RESULTS], {
-//         [TagFunctions.ATTACHMENT]: undefined,
-//       }),
-//     });
-//     const { code, urls } = generateCodeFromLanguage(language, arg);
-//     if (!code) {
-//       return true;
-//     }
+    // const variables = Object.assign({
+    //   [PrivateVariables.FILES]: tag.files.map((file) => {
+    //     return {description: file.description, filename: file.filename};
+    //   }),
+    // }, tag.variables, {
+    //   [PrivateVariables.RESULTS]: Object.assign({}, tag.variables[PrivateVariables.RESULTS], {
+    //     [TagFunctions.ATTACHMENT]: undefined,
+    //   }),
+    // });
+    // const { code, urls } = generateCodeFromLanguage(language, arg);
+    // if (!code) {
+    //   return true;
+    // }
 
-//     const files: Array<RequestFile> = [];
-//     const cache = new Set<number>();
-//     for (let urlObj of Object.values(urls)) {
-//       for (let match of urlObj.url.matchAll(URL_FILE_REPLACEMENT_REGEX)) {
-//         const fileKey = parseInt(match[1]) - 1;
-//         if (!cache.has(fileKey)) {
-//           cache.add(fileKey);
-//           const file = tag.files[fileKey];
-//           if (!file) {
-//             throw new Error('Invalid FILE_ Provied');
-//           }
-//           if (!file.buffer) {
-//             urlObj.url = file.url;
-//             continue;
-//           }
-//           files.push({filename: urlObj.filename || file.filename, value: file.buffer});
-//           if (!match[2]) {
-//             file.deleted = true;
-//           }
-//         }
-//         urlObj.url = '';
-//         break;
-//       }
-//     }
+    // const files: Array<RequestFile> = [];
+    // const cache = new Set<number>();
+    // for (let urlObj of Object.values(urls)) {
+    //   for (let match of urlObj.url.matchAll(URL_FILE_REPLACEMENT_REGEX)) {
+    //     const fileKey = parseInt(match[1]) - 1;
+    //     if (!cache.has(fileKey)) {
+    //       cache.add(fileKey);
+    //       const file = tag.files[fileKey];
+    //       if (!file) {
+    //         throw new Error('Invalid FILE_ Provied');
+    //       }
+    //       if (!file.buffer) {
+    //         urlObj.url = file.url;
+    //         continue;
+    //       }
+    //       files.push({filename: urlObj.filename || file.filename, value: file.buffer});
+    //       if (!match[2]) {
+    //         file.deleted = true;
+    //       }
+    //     }
+    //     urlObj.url = '';
+    //     break;
+    //   }
+    // }
 
-//     for (let i = 0; i < tag.files.length; i++) {
-//       if (tag.files[i].deleted) {
-//         tag.files.splice(i, 1);
-//       }
-//     }
+    // for (let i = 0; i < tag.files.length; i++) {
+    //   if (tag.files[i].deleted) {
+    //     tag.files.splice(i, 1);
+    //   }
+    // }
 
-//     const { result } = await utilitiesCodeRun(context, {
-//       code,
-//       files,
-//       language,
-//       stdin: generateCodeStdin(context, variables, storage),
-//       urls: Object.values(urls).filter((x) => x.url),
-//       version: version || undefined,
-//     });
+    // const { result } = await utilitiesCodeRun(context, {
+    //   code,
+    //   files,
+    //   language,
+    //   stdin: generateCodeStdin(context, variables, storage),
+    //   urls: Object.values(urls).filter((x) => x.url),
+    //   version: version || undefined,
+    // });
 
-//     if (result.error) {
-//       // if it starts with ffmpeg error, check if its only 1 or less files to throw error
-//       if (result.error.startsWith(CODE_EXECUTION_FFMPEG_DEFAULT_STDERR_PREPEND) || result.error.includes('Input')) {
-//         if (result.files.every((x) => x.filename === '___internals__.json')) {
-//           throw new Error(result.error);
-//         }
-//       } else {
-//         throw new Error(result.error);
-//       }
-//     }
+    // if (result.error) {
+    //   // if it starts with ffmpeg error, check if its only 1 or less files to throw error
+    //   if (result.error.startsWith(CODE_EXECUTION_FFMPEG_DEFAULT_STDERR_PREPEND) || result.error.includes('Input')) {
+    //     if (result.files.every((x) => x.filename === '___internals__.json')) {
+    //       throw new Error(result.error);
+    //     }
+    //   } else {
+    //     throw new Error(result.error);
+    //   }
+    // }
 
-//     if (result.files.length) {
-//       const maxFileSize = context.maxAttachmentSize;
-//       for (let file of result.files) {
-//         const { filename, size, value } = file;
-//         if (maxFileSize < size) {
-//           continue;
-//         }
-//         if (filename === '__internals__.json') {
-//           let response: any = {};
-//           try {
-//             response = JSON.parse(Buffer.from(value, 'base64').toString());
-//           } catch(error) {
+    // if (result.files.length) {
+    //   const maxFileSize = context.maxAttachmentSize;
+    //   for (let file of result.files) {
+    //     const { filename, size, value } = file;
+    //     if (maxFileSize < size) {
+    //       continue;
+    //     }
+    //     if (filename === '__internals__.json') {
+    //       let response: any = {};
+    //       try {
+    //         response = JSON.parse(Buffer.from(value, 'base64').toString());
+    //       } catch(error) {
 
-//           }
+    //       }
 
-//           if (typeof(response) === 'object') {
-//             if (typeof(response.variables) === 'object') {
-//               const variables = response.variables;
-//               for (let key in variables) {
-//                 if (key.startsWith(PRIVATE_VARIABLE_PREFIX)) {
-//                   continue;
-//                 }
+    //       if (typeof(response) === 'object') {
+    //         if (typeof(response.variables) === 'object') {
+    //           const variables = response.variables;
+    //           for (let key in variables) {
+    //             if (key.startsWith(PRIVATE_VARIABLE_PREFIX)) {
+    //               continue;
+    //             }
 
-//                 if (tag.limits.MAX_VARIABLE_KEY_LENGTH < key.length) {
-//                   throw new Error(`Variable cannot be more than ${tag.limits.MAX_VARIABLE_KEY_LENGTH} characters`);
-//                 }
+    //             if (tag.limits.MAX_VARIABLE_KEY_LENGTH < key.length) {
+    //               throw new Error(`Variable cannot be more than ${tag.limits.MAX_VARIABLE_KEY_LENGTH} characters`);
+    //             }
 
-//                 if (!(key in tag.variables)) {
-//                   if (tag.limits.MAX_VARIABLES <= Object.keys(tag.variables).filter((key) => !key.startsWith(PRIVATE_VARIABLE_PREFIX)).length) {
-//                     throw new Error(`Reached max variable amount (Max ${tag.limits.MAX_VARIABLES.toLocaleString()} Variables)`);
-//                   }
-//                 }
+    //             if (!(key in tag.variables)) {
+    //               if (tag.limits.MAX_VARIABLES <= Object.keys(tag.variables).filter((key) => !key.startsWith(PRIVATE_VARIABLE_PREFIX)).length) {
+    //                 throw new Error(`Reached max variable amount (Max ${tag.limits.MAX_VARIABLES.toLocaleString()} Variables)`);
+    //               }
+    //             }
 
-//                 tag.variables[key] = String((variables as any)[key]).slice(0, tag.limits.MAX_VARIABLE_LENGTH);
-//               }
-//             }
+    //             tag.variables[key] = String((variables as any)[key]).slice(0, tag.limits.MAX_VARIABLE_LENGTH);
+    //           }
+    //         }
 
-//             if (response.storage && typeof(response.storage) === 'object') {
-//               const variables = response.storage;
-//               const formattedVariables: Array<{name: string, storageId: string, storageType: TagVariableStorageTypes, value: string}> = [];
-//               if (variables.global === undefined) {
-//                 // set the default variables
-//                 for (let key in storage.global) {
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: '0',
-//                     storageType: TagVariableStorageTypes.GLOBAL,
-//                     value: storage.global[key],
-//                   });
-//                 }
-//               } else if (variables.global === null) {
-//                 // clear the variables
-//               } else if (typeof(variables.global) === 'object') {
-//                 if (tag.limits.MAX_STORAGE_GLOBAL_AMOUNT < Object.keys(variables.global).length) {
-//                   throw new Error(`Global Variables exceeded max amount (${tag.limits.MAX_STORAGE_GLOBAL_AMOUNT})`);
-//                 }
-//                 for (let key in variables.global) {
-//                   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-//                     throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-//                   }
-//                   const value = String(variables.global[key]);
-//                   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
-//                     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-//                   }
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: '0',
-//                     storageType: TagVariableStorageTypes.GLOBAL,
-//                     value,
-//                   });
-//                 }
-//               } else {
-//                 throw new Error(`Global Variables must be an object or null`);
-//               }
+    //         if (response.storage && typeof(response.storage) === 'object') {
+    //           const variables = response.storage;
+    //           const formattedVariables: Array<{name: string, storageId: string, storageType: TagVariableStorageTypes, value: string}> = [];
+    //           if (variables.global === undefined) {
+    //             // set the default variables
+    //             for (let key in storage.global) {
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: '0',
+    //                 storageType: TagVariableStorageTypes.GLOBAL,
+    //                 value: storage.global[key],
+    //               });
+    //             }
+    //           } else if (variables.global === null) {
+    //             // clear the variables
+    //           } else if (typeof(variables.global) === 'object') {
+    //             if (tag.limits.MAX_STORAGE_GLOBAL_AMOUNT < Object.keys(variables.global).length) {
+    //               throw new Error(`Global Variables exceeded max amount (${tag.limits.MAX_STORAGE_GLOBAL_AMOUNT})`);
+    //             }
+    //             for (let key in variables.global) {
+    //               if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+    //                 throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+    //               }
+    //               const value = String(variables.global[key]);
+    //               if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
+    //                 throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+    //               }
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: '0',
+    //                 storageType: TagVariableStorageTypes.GLOBAL,
+    //                 value,
+    //               });
+    //             }
+    //           } else {
+    //             throw new Error(`Global Variables must be an object or null`);
+    //           }
 
-//               if (variables.server === undefined) {
-//                 // set the default variables
-//                 for (let key in storage.server) {
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.guildId || context.channelId!,
-//                     storageType: TagVariableStorageTypes.GUILD,
-//                     value: storage.server[key],
-//                   });
-//                 }
-//               } else if (variables.server === null) {
-//                 // clear the variables
-//               } else if (typeof(variables.server) === 'object') {
-//                 if (tag.limits.MAX_STORAGE_GUILD_AMOUNT < Object.keys(variables.server).length) {
-//                   throw new Error(`Server Variables exceeded max amount (${tag.limits.MAX_STORAGE_GUILD_AMOUNT})`);
-//                 }
-//                 for (let key in variables.server) {
-//                   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-//                     throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-//                   }
-//                   const value = String(variables.server[key]);
-//                   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
-//                     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-//                   }
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.guildId || context.channelId!,
-//                     storageType: TagVariableStorageTypes.GUILD,
-//                     value,
-//                   });
-//                 }
-//               } else {
-//                 throw new Error(`Server Variables must be an object or null`);
-//               }
+    //           if (variables.server === undefined) {
+    //             // set the default variables
+    //             for (let key in storage.server) {
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.guildId || context.channelId!,
+    //                 storageType: TagVariableStorageTypes.GUILD,
+    //                 value: storage.server[key],
+    //               });
+    //             }
+    //           } else if (variables.server === null) {
+    //             // clear the variables
+    //           } else if (typeof(variables.server) === 'object') {
+    //             if (tag.limits.MAX_STORAGE_GUILD_AMOUNT < Object.keys(variables.server).length) {
+    //               throw new Error(`Server Variables exceeded max amount (${tag.limits.MAX_STORAGE_GUILD_AMOUNT})`);
+    //             }
+    //             for (let key in variables.server) {
+    //               if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+    //                 throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+    //               }
+    //               const value = String(variables.server[key]);
+    //               if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
+    //                 throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+    //               }
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.guildId || context.channelId!,
+    //                 storageType: TagVariableStorageTypes.GUILD,
+    //                 value,
+    //               });
+    //             }
+    //           } else {
+    //             throw new Error(`Server Variables must be an object or null`);
+    //           }
 
-//               if (variables.channel === undefined) {
-//                 // set the default variables
-//                 for (let key in storage.channel) {
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.channelId!,
-//                     storageType: TagVariableStorageTypes.CHANNEL,
-//                     value: storage.channel[key],
-//                   });
-//                 }
-//               } else if (variables.channel === null) {
-//                 // clear the variables
-//               } else if (typeof(variables.channel) === 'object') {
-//                 if (tag.limits.MAX_STORAGE_CHANNEL_AMOUNT < Object.keys(variables.channel).length) {
-//                   throw new Error(`Channel Variables exceeded max amount (${tag.limits.MAX_STORAGE_CHANNEL_AMOUNT})`);
-//                 }
-//                 for (let key in variables.channel) {
-//                   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-//                     throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-//                   }
-//                   const value = String(variables.channel[key]);
-//                   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
-//                     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-//                   }
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.channelId!,
-//                     storageType: TagVariableStorageTypes.CHANNEL,
-//                     value,
-//                   });
-//                 }
-//               } else {
-//                 throw new Error(`Channel Variables must be an object or null`);
-//               }
+    //           if (variables.channel === undefined) {
+    //             // set the default variables
+    //             for (let key in storage.channel) {
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.channelId!,
+    //                 storageType: TagVariableStorageTypes.CHANNEL,
+    //                 value: storage.channel[key],
+    //               });
+    //             }
+    //           } else if (variables.channel === null) {
+    //             // clear the variables
+    //           } else if (typeof(variables.channel) === 'object') {
+    //             if (tag.limits.MAX_STORAGE_CHANNEL_AMOUNT < Object.keys(variables.channel).length) {
+    //               throw new Error(`Channel Variables exceeded max amount (${tag.limits.MAX_STORAGE_CHANNEL_AMOUNT})`);
+    //             }
+    //             for (let key in variables.channel) {
+    //               if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+    //                 throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+    //               }
+    //               const value = String(variables.channel[key]);
+    //               if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
+    //                 throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+    //               }
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.channelId!,
+    //                 storageType: TagVariableStorageTypes.CHANNEL,
+    //                 value,
+    //               });
+    //             }
+    //           } else {
+    //             throw new Error(`Channel Variables must be an object or null`);
+    //           }
 
-//               if (variables.user === undefined) {
-//                 // set the default variables
-//                 for (let key in storage.user) {
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.userId,
-//                     storageType: TagVariableStorageTypes.USER,
-//                     value: storage.user[key],
-//                   });
-//                 }
-//               } else if (variables.user === null) {
-//                 // clear the variables
-//               } else if (typeof(variables.user) === 'object') {
-//                 if (tag.limits.MAX_STORAGE_USER_AMOUNT < Object.keys(variables.user).length) {
-//                   throw new Error(`User Variables exceeded max amount (${tag.limits.MAX_STORAGE_USER_AMOUNT})`);
-//                 }
-//                 for (let key in variables.user) {
-//                   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-//                     throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-//                   }
-//                   const value = String(variables.user[key]);
-//                   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
-//                     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-//                   }
-//                   formattedVariables.push({
-//                     name: String(key),
-//                     storageId: context.userId,
-//                     storageType: TagVariableStorageTypes.USER,
-//                     value,
-//                   });
-//                 }
-//               } else {
-//                 throw new Error(`User Variables must be an object or null`);
-//               }
+    //           if (variables.user === undefined) {
+    //             // set the default variables
+    //             for (let key in storage.user) {
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.userId,
+    //                 storageType: TagVariableStorageTypes.USER,
+    //                 value: storage.user[key],
+    //               });
+    //             }
+    //           } else if (variables.user === null) {
+    //             // clear the variables
+    //           } else if (typeof(variables.user) === 'object') {
+    //             if (tag.limits.MAX_STORAGE_USER_AMOUNT < Object.keys(variables.user).length) {
+    //               throw new Error(`User Variables exceeded max amount (${tag.limits.MAX_STORAGE_USER_AMOUNT})`);
+    //             }
+    //             for (let key in variables.user) {
+    //               if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+    //                 throw new Error(`Storage Variable Key cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+    //               }
+    //               const value = String(variables.user[key]);
+    //               if (tag.limits.MAX_STORAGE_VALUE_LENGTH < value.length) {
+    //                 throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+    //               }
+    //               formattedVariables.push({
+    //                 name: String(key),
+    //                 storageId: context.userId,
+    //                 storageType: TagVariableStorageTypes.USER,
+    //                 value,
+    //               });
+    //             }
+    //           } else {
+    //             throw new Error(`User Variables must be an object or null`);
+    //           }
 
-//               let hasChange = false;
-//               if (variables.global !== undefined) {
-//                 if (variables.global) {
-//                   hasChange = Object.keys(variables.global).length !== Object.keys(storage.global).length;
-//                 } else {
-//                   hasChange = !!Object.keys(storage.global).length;
-//                 }
-//               }
-//               if (!hasChange && variables.server !== undefined) {
-//                 if (variables.server) {
-//                   hasChange = Object.keys(variables.server).length !== Object.keys(storage.server).length;
-//                 } else {
-//                   hasChange = !!Object.keys(storage.server).length;
-//                 }
-//               }
-//               if (!hasChange && variables.channel !== undefined) {
-//                 if (variables.channel) {
-//                   hasChange = Object.keys(variables.channel).length !== Object.keys(storage.channel).length;
-//                 } else {
-//                   hasChange = !!Object.keys(storage.channel).length;
-//                 }
-//               }
-//               if (!hasChange && variables.user !== undefined) {
-//                 if (variables.user) {
-//                   hasChange = Object.keys(variables.user).length !== Object.keys(storage.user).length;
-//                 } else {
-//                   hasChange = !!Object.keys(storage.user).length;
-//                 }
-//               }
+    //           let hasChange = false;
+    //           if (variables.global !== undefined) {
+    //             if (variables.global) {
+    //               hasChange = Object.keys(variables.global).length !== Object.keys(storage.global).length;
+    //             } else {
+    //               hasChange = !!Object.keys(storage.global).length;
+    //             }
+    //           }
+    //           if (!hasChange && variables.server !== undefined) {
+    //             if (variables.server) {
+    //               hasChange = Object.keys(variables.server).length !== Object.keys(storage.server).length;
+    //             } else {
+    //               hasChange = !!Object.keys(storage.server).length;
+    //             }
+    //           }
+    //           if (!hasChange && variables.channel !== undefined) {
+    //             if (variables.channel) {
+    //               hasChange = Object.keys(variables.channel).length !== Object.keys(storage.channel).length;
+    //             } else {
+    //               hasChange = !!Object.keys(storage.channel).length;
+    //             }
+    //           }
+    //           if (!hasChange && variables.user !== undefined) {
+    //             if (variables.user) {
+    //               hasChange = Object.keys(variables.user).length !== Object.keys(storage.user).length;
+    //             } else {
+    //               hasChange = !!Object.keys(storage.user).length;
+    //             }
+    //           }
 
-//               if (!hasChange) {
-//                 for (let item of formattedVariables) {
-//                   switch (item.storageType) {
-//                     case TagVariableStorageTypes.CHANNEL: {
-//                       if (storage.channel && !(item.name in storage.channel) || storage.channel[item.name] !== item.value) {
-//                         hasChange = true;
-//                       }
-//                     }; break;
-//                     case TagVariableStorageTypes.GLOBAL: {
-//                       if (storage.global && !(item.name in storage.global) || storage.global[item.name] !== item.value) {
-//                         hasChange = true;
-//                       }
-//                     }; break;
-//                     case TagVariableStorageTypes.GUILD: {
-//                       if (storage.server && !(item.name in storage.server) || storage.server[item.name] !== item.value) {
-//                         hasChange = true;
-//                       }
-//                     }; break;
-//                     case TagVariableStorageTypes.USER: {
-//                       if (storage.user && !(item.name in storage.user) || storage.user[item.name] !== item.value) {
-//                         hasChange = true;
-//                       }
-//                     }; break;
-//                   }
-//                   if (hasChange) {
-//                     break;
-//                   }
-//                 }
-//               }
+    //           if (!hasChange) {
+    //             for (let item of formattedVariables) {
+    //               switch (item.storageType) {
+    //                 case TagVariableStorageTypes.CHANNEL: {
+    //                   if (storage.channel && !(item.name in storage.channel) || storage.channel[item.name] !== item.value) {
+    //                     hasChange = true;
+    //                   }
+    //                 }; break;
+    //                 case TagVariableStorageTypes.GLOBAL: {
+    //                   if (storage.global && !(item.name in storage.global) || storage.global[item.name] !== item.value) {
+    //                     hasChange = true;
+    //                   }
+    //                 }; break;
+    //                 case TagVariableStorageTypes.GUILD: {
+    //                   if (storage.server && !(item.name in storage.server) || storage.server[item.name] !== item.value) {
+    //                     hasChange = true;
+    //                   }
+    //                 }; break;
+    //                 case TagVariableStorageTypes.USER: {
+    //                   if (storage.user && !(item.name in storage.user) || storage.user[item.name] !== item.value) {
+    //                     hasChange = true;
+    //                   }
+    //                 }; break;
+    //               }
+    //               if (hasChange) {
+    //                 break;
+    //               }
+    //             }
+    //           }
 
-//               if (hasChange && tagId) {
-//                 const storageResponse = await putTagVariables(context, tagId, {
-//                   channelId: context.channelId!,
-//                   guildId: context.guildId,
-//                   userId: context.userId,
-//                   variables: formattedVariables,
-//                 });
-//                 // store it in tagresult i guess
-//               }
-//             }
-//           }
-//           continue;
-//         }
+    //           if (hasChange && tagId) {
+    //             const storageResponse = await putTagVariables(context, tagId, {
+    //               channelId: context.channelId!,
+    //               guildId: context.guildId,
+    //               userId: context.userId,
+    //               variables: formattedVariables,
+    //             });
+    //             // store it in tagresult i guess
+    //           }
+    //         }
+    //       }
+    //       continue;
+    //     }
 
-//         if (maxFileSize < size) {
-//           throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-//         }
+    //     if (maxFileSize < size) {
+    //       throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+    //     }
 
-//         /*
-//         const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-//         if (maxFileSize <= currentFileSize + size) {
-//           throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-//         }
-//         */
-//         tag.variables[PrivateVariables.FILE_SIZE] += size;
+    //     /*
+    //     const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+    //     if (maxFileSize <= currentFileSize + size) {
+    //       throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+    //     }
+    //     */
+    //     tag.variables[PrivateVariables.FILE_SIZE] += size;
 
-//         tag.files.push({
-//           buffer: Buffer.from(value, 'base64'),
-//           filename,
-//           url: '',
-//         });
+    //     tag.files.push({
+    //       buffer: Buffer.from(value, 'base64'),
+    //       filename,
+    //       url: '',
+    //     });
 
-//         if (tag.limits.MAX_ATTACHMENTS < tag.files.length) {
-//           throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-//         }
-//       }
-//     }
+    //     if (tag.limits.MAX_ATTACHMENTS < tag.files.length) {
+    //       throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+    //     }
+    //   }
+    // }
 
-//     let isComponents = false;
-//     let isEmbed = false;
-//     if (result.output.length <= 16000) {
-//       // just incase its a big content lol
-//       let object: any = null;
-//       try {
-//         object = JSON.parse(result.output);
-//       } catch(error) {
+    // let isComponents = false;
+    // let isEmbed = false;
+    // if (result.output.length <= 16000) {
+    //   // just incase its a big content lol
+    //   let object: any = null;
+    //   try {
+    //     object = JSON.parse(result.output);
+    //   } catch(error) {
         
-//       }
+    //   }
       
-//       if (object && typeof(object) === 'object') {
-//         const keysLength = Object.keys(object).length;
-//         if (keysLength === 1 && 'pages' in object && Array.isArray(object.pages)) {
-//           // parse them
-//           // [{embed}]
-//           for (let page of object.pages) {
-//             let content: string | undefined;
-//             let embeds: Array<Embed> | undefined;
-//             let filenames: Array<string> | undefined;
-//             if (typeof(page) !== 'object') {
-//               throw new Error('Invalid Page Given');
-//             }
-//             if ('content' in page && typeof(page.content) === 'string') {
-//               content = page.content;
-//             }
-//             if ('embed' in page && typeof(page.embed) === 'object') {
-//               try {
-//                 const embed = new Embed(page.embed);
-//                 if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
-//                   throw new Error('this error doesn\'t matter');
-//                 }
-//                 embeds = [embed];
-//               } catch(error) {
-//                 throw new Error('Invalid Page Given');
-//               }
-//             }
-//             if ('files' in page && Array.isArray(page.files)) {
-//               for (let filename of page.files) {
-//                 if (filename && typeof(filename) === 'string' && filename.startsWith('attachment://')) {
-//                   if (!filenames) {
-//                     filenames = [];
-//                   }
-//                   filenames.push(filename);
-//                 }
-//               }
-//             }
-//             if (!content && !embeds && !filenames) {
-//               throw new Error('Invalid Page Given');
-//             }
-//             tag.pages.push({content, embeds, filenames});
-//             if (tag.limits.MAX_PAGES < tag.pages.length) {
-//               throw new Error(`Pages surpassed max pages length of ${tag.limits.MAX_PAGES}`);
-//             }
-//           }
-//         }
-//         if ('components' in object && Array.isArray(object.components)) {
-//           const components: TagResultComponents = {components: []};
-//           for (let x of object.components) {
-//             if (typeof(x) !== 'object') {
-//               continue;
-//             }
-//             const component = parseComponentFromData(x);
-//             components.components.push(component);
-//             checkTagComponentsLimit(components);
-//           }
-//           if ('componentsOnTimeout' in object && typeof(object.componentsOnTimeout) === 'string') {
-//             components.onTimeout = object.componentsOnTimeout;
-//           }
-//           if (components.components.length) {
-//             tag.components = components;
-//             isComponents = true;
-//           }
-//         }
-//         if (('embed' in object) || ('embeds' in object)) {
-//           const embeds: Array<Record<string, any>> = [];
-//           if ('embed' in object && typeof(object.embed) === 'object') {
-//             embeds.push(object.embed);
-//           }
-//           if ('embeds' in object && Array.isArray(object.embeds)) {
-//             for (let embed of object.embeds) {
-//               if (typeof(embed) === 'object') {
-//                 embeds.push(embed);
-//               }
-//             }
-//           }
+    //   if (object && typeof(object) === 'object') {
+    //     const keysLength = Object.keys(object).length;
+    //     if (keysLength === 1 && 'pages' in object && Array.isArray(object.pages)) {
+    //       // parse them
+    //       // [{embed}]
+    //       for (let page of object.pages) {
+    //         let content: string | undefined;
+    //         let embeds: Array<Embed> | undefined;
+    //         let filenames: Array<string> | undefined;
+    //         if (typeof(page) !== 'object') {
+    //           throw new Error('Invalid Page Given');
+    //         }
+    //         if ('content' in page && typeof(page.content) === 'string') {
+    //           content = page.content;
+    //         }
+    //         if ('embed' in page && typeof(page.embed) === 'object') {
+    //           try {
+    //             const embed = new Embed(page.embed);
+    //             if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
+    //               throw new Error('this error doesn\'t matter');
+    //             }
+    //             embeds = [embed];
+    //           } catch(error) {
+    //             throw new Error('Invalid Page Given');
+    //           }
+    //         }
+    //         if ('files' in page && Array.isArray(page.files)) {
+    //           for (let filename of page.files) {
+    //             if (filename && typeof(filename) === 'string' && filename.startsWith('attachment://')) {
+    //               if (!filenames) {
+    //                 filenames = [];
+    //               }
+    //               filenames.push(filename);
+    //             }
+    //           }
+    //         }
+    //         if (!content && !embeds && !filenames) {
+    //           throw new Error('Invalid Page Given');
+    //         }
+    //         tag.pages.push({content, embeds, filenames});
+    //         if (tag.limits.MAX_PAGES < tag.pages.length) {
+    //           throw new Error(`Pages surpassed max pages length of ${tag.limits.MAX_PAGES}`);
+    //         }
+    //       }
+    //     }
+    //     if ('components' in object && Array.isArray(object.components)) {
+    //       const components: TagResultComponents = {components: []};
+    //       for (let x of object.components) {
+    //         if (typeof(x) !== 'object') {
+    //           continue;
+    //         }
+    //         const component = parseComponentFromData(x);
+    //         components.components.push(component);
+    //         checkTagComponentsLimit(components);
+    //       }
+    //       if ('componentsOnTimeout' in object && typeof(object.componentsOnTimeout) === 'string') {
+    //         components.onTimeout = object.componentsOnTimeout;
+    //       }
+    //       if (components.components.length) {
+    //         tag.components = components;
+    //         isComponents = true;
+    //       }
+    //     }
+    //     if (('embed' in object) || ('embeds' in object)) {
+    //       const embeds: Array<Record<string, any>> = [];
+    //       if ('embed' in object && typeof(object.embed) === 'object') {
+    //         embeds.push(object.embed);
+    //       }
+    //       if ('embeds' in object && Array.isArray(object.embeds)) {
+    //         for (let embed of object.embeds) {
+    //           if (typeof(embed) === 'object') {
+    //             embeds.push(embed);
+    //           }
+    //         }
+    //       }
 
-//           if (tag.limits.MAX_EMBEDS < embeds.length) {
-//             throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
-//           }
+    //       if (tag.limits.MAX_EMBEDS < embeds.length) {
+    //         throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
+    //       }
 
-//           isEmbed = true;
-//           for (let raw of embeds) {
-//             // todo: maybe add embed length checks here?
-//             try {
-//               const embed = new Embed(raw);
-//               if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
-//                 throw new Error('this error doesn\'t matter');
-//               }
-//               tag.embeds.push(embed);
-//             } catch(error) {
-//               throw new Error('Invalid Embed Given');
-//             }
-//           }
+    //       isEmbed = true;
+    //       for (let raw of embeds) {
+    //         // todo: maybe add embed length checks here?
+    //         try {
+    //           const embed = new Embed(raw);
+    //           if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
+    //             throw new Error('this error doesn\'t matter');
+    //           }
+    //           tag.embeds.push(embed);
+    //         } catch(error) {
+    //           throw new Error('Invalid Embed Given');
+    //         }
+    //       }
 
-//           if (tag.limits.MAX_EMBEDS < tag.embeds.length) {
-//             throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
-//           }
-//         }
-//       }
+    //       if (tag.limits.MAX_EMBEDS < tag.embeds.length) {
+    //         throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
+    //       }
+    //     }
+    //   }
 
-//       if (!isComponents && !isEmbed) {
-//         tag.text += result.output;
-//       }
-//     }
-
-//     return true;
-//   },
+    //   if (!isComponents && !isEmbed) {
+    //     tag.text += result.output;
+    //   }
+    // }
+    // TODO: A system to embed local programming languages installed, like node.js,
+    return true;
+  },
 
 //   [TagFunctions.AI]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
 //     // {ai:question}
@@ -885,385 +887,385 @@ export const ScriptTags = Object.freeze({
     return true;
   },
 
-  [TagFunctions.ATTACHMENT]: async (context: DiscordContextLike, arg: string, tag: TagResult, spoiler?: boolean): Promise<boolean> => {
-    // assume the arg is a url and download it
-    // {attach:url|filename|description}
-    // {attach:https://google.com/something.png}
-    // {attach:https://google.com/something.png|something_lol.png}
+  // [TagFunctions.ATTACHMENT]: async (context: DiscordContextLike, arg: string, tag: TagResult, spoiler?: boolean): Promise<boolean> => {
+  //   // assume the arg is a url and download it
+  //   // {attach:url|filename|description}
+  //   // {attach:https://google.com/something.png}
+  //   // {attach:https://google.com/something.png|something_lol.png}
 
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
 
-    let [ urlString, filenameArg, descriptionValue ] = split(arg, 3);
+  //   let [ urlString, filenameArg, descriptionValue ] = split(arg, 3);
 
-    const url = await Parameters.url(urlString.trim(), context);
+  //   const url = await Parameters.url(urlString.trim(), context);
 
-    const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.ATTACHMENT] = (
-      tag.variables[PrivateVariables.RESULTS][TagFunctions.ATTACHMENT] ||
-      {}
-    );
+  //   const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.ATTACHMENT] = (
+  //     tag.variables[PrivateVariables.RESULTS][TagFunctions.ATTACHMENT] ||
+  //     {}
+  //   );
 
-    if (!(url in cachedResults)) {
-      increaseNetworkRequests(tag);
-    }
+  //   if (!(url in cachedResults)) {
+  //     increaseNetworkRequests(tag);
+  //   }
 
-    try {
-      const maxFileSize = context.maxAttachmentSize;
-      const response = cachedResults[url] || await utilitiesFetchMedia(context, {
-        maxFileSize,
-        safe: DefaultParameters.safe(context),
-        url,
-      });
-      if (!(url in cachedResults)) {
-        cachedResults[url] = response;
-      }
+  //   try {
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     const response = cachedResults[url] || await utilitiesFetchMedia(context, {
+  //       maxFileSize,
+  //       safe: DefaultParameters.safe(context),
+  //       url,
+  //     });
+  //     if (!(url in cachedResults)) {
+  //       cachedResults[url] = response;
+  //     }
 
-      const filename = filenameArg || response.file.filename_safe;
+  //     const filename = filenameArg || response.file.filename_safe;
 
-      let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-      if (response.file.metadata.mimetype.startsWith('text/')) {
-        data = data.toString();
-      }
+  //     let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //     if (response.file.metadata.mimetype.startsWith('text/')) {
+  //       data = data.toString();
+  //     }
 
-      if (maxFileSize < data.length) {
-        throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-      }
+  //     if (maxFileSize < data.length) {
+  //       throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //     }
 
-      /*
-      const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-      if (maxFileSize <= currentFileSize + data.length) {
-        throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-      }
-      */
-      tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+  //     /*
+  //     const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+  //     if (maxFileSize <= currentFileSize + data.length) {
+  //       throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+  //     }
+  //     */
+  //     tag.variables[PrivateVariables.FILE_SIZE] += data.length;
 
-      tag.files.push({
-        buffer: data,
-        description: descriptionValue,
-        filename,
-        spoiler,
-        url,
-      });
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //     tag.files.push({
+  //       buffer: data,
+  //       description: descriptionValue,
+  //       filename,
+  //       spoiler,
+  //       url,
+  //     });
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.ATTACHMENT_LAST]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // return last image url
-    // {lastattachment}
+  // [TagFunctions.ATTACHMENT_LAST]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // return last image url
+  //   // {lastattachment}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    const url = await lastImageUrl('', context);
-    if (url) {
-      tag.text += url;
-    }
+  //   const url = await lastImageUrl('', context);
+  //   if (url) {
+  //     tag.text += url;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.ATTACHMENT_SPOILER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // assume the arg is a url and download it
-    // {attachspoiler:https://google.com/something.png}
-    return ScriptTags[TagFunctions.ATTACHMENT](context, arg, tag, true);
-  },
+  // [TagFunctions.ATTACHMENT_SPOILER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // assume the arg is a url and download it
+  //   // {attachspoiler:https://google.com/something.png}
+  //   return ScriptTags[TagFunctions.ATTACHMENT](context, arg, tag, true);
+  // },
 
-  [TagFunctions.ATTACHMENT_TEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {attachtext:text}
-    // {attachtext:some text here}
+  // [TagFunctions.ATTACHMENT_TEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {attachtext:text}
+  //   // {attachtext:some text here}
 
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
 
-    let extension = 'txt';
-    if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      // parse the language in the future here
-    }
+  //   let extension = 'txt';
+  //   if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     // parse the language in the future here
+  //   }
 
-    let filename = 'content';
-    if (tag.files.length) {
-      filename = `${filename}.${tag.files.length + 1}`;
-    }
+  //   let filename = 'content';
+  //   if (tag.files.length) {
+  //     filename = `${filename}.${tag.files.length + 1}`;
+  //   }
 
-    const data = arg;
-    try {
-      const maxFileSize = context.maxAttachmentSize;
-      if (maxFileSize < data.length) {
-        throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-      }
+  //   const data = arg;
+  //   try {
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     if (maxFileSize < data.length) {
+  //       throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //     }
 
-      /*
-      const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-      if (maxFileSize <= currentFileSize + data.length) {
-        throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-      }
-      */
-      tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+  //     /*
+  //     const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+  //     if (maxFileSize <= currentFileSize + data.length) {
+  //       throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+  //     }
+  //     */
+  //     tag.variables[PrivateVariables.FILE_SIZE] += data.length;
 
-      tag.files.push({buffer: data, filename: `${filename}.${extension}`, spoiler: false, url: ''});
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //     tag.files.push({buffer: data, filename: `${filename}.${extension}`, spoiler: false, url: ''});
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.ATTACHMENT_VOICE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // assume the arg is a url and download it
-    // {attach:url|filename}
-    // {attach:https://google.com/something.mp3}
-    // {attach:https://google.com/something.mp3|voice-message}
+  // [TagFunctions.ATTACHMENT_VOICE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // assume the arg is a url and download it
+  //   // {attach:url|filename}
+  //   // {attach:https://google.com/something.mp3}
+  //   // {attach:https://google.com/something.mp3|voice-message}
   
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
 
-    let [ urlString, filenameArg ] = split(arg, 2);
+  //   let [ urlString, filenameArg ] = split(arg, 2);
 
-    const url = await Parameters.url(urlString.trim(), context);
+  //   const url = await Parameters.url(urlString.trim(), context);
 
-    increaseNetworkRequests(tag);
-    try {
-      const maxFileSize = context.maxAttachmentSize;
-      const response = await mediaAVToolsExtractAudio(context, {
-        maxFileSize,
-        mimetype: Mimetypes.AUDIO_OGG,
-        url,
-        waveform: true,
-      });
-      const filename = filenameArg || response.file.filename_safe;
-      const waveform = response.arguments && response.arguments.waveform;
+  //   increaseNetworkRequests(tag);
+  //   try {
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     const response = await mediaAVToolsExtractAudio(context, {
+  //       maxFileSize,
+  //       mimetype: Mimetypes.AUDIO_OGG,
+  //       url,
+  //       waveform: true,
+  //     });
+  //     const filename = filenameArg || response.file.filename_safe;
+  //     const waveform = response.arguments && response.arguments.waveform;
 
-      const data: Buffer = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-      if (maxFileSize < data.length) {
-        throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-      }
+  //     const data: Buffer = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //     if (maxFileSize < data.length) {
+  //       throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //     }
 
-      /*
-      const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-      if (maxFileSize <= currentFileSize + data.length) {
-        throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-      }
-      */
-      tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+  //     /*
+  //     const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+  //     if (maxFileSize <= currentFileSize + data.length) {
+  //       throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+  //     }
+  //     */
+  //     tag.variables[PrivateVariables.FILE_SIZE] += data.length;
 
-      tag.files.push({
-        buffer: data,
-        durationSecs: 2147483647, //response.file.metadata.duration / 1000,
-        filename,
-        spoiler: false,
-        waveform,
-        url,
-      });
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //     tag.files.push({
+  //       buffer: data,
+  //       durationSecs: 2147483647, //response.file.metadata.duration / 1000,
+  //       filename,
+  //       spoiler: false,
+  //       waveform,
+  //       url,
+  //     });
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.AVATAR]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns the user's avatar url
-    // {avatar}
-    // {avatar:notsobot}
-    // {avatar:notsobot#1}
-    // {avatar:439205512425504771}
+  // [TagFunctions.AVATAR]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns the user's avatar url
+  //   // {avatar}
+  //   // {avatar:notsobot}
+  //   // {avatar:notsobot#1}
+  //   // {avatar:439205512425504771}
 
-    if (arg) {
-      increaseNetworkRequests(tag);
-      const memberOrUser = await findMemberOrUser(arg, context);
-      if (memberOrUser) {
-        tag.text += memberOrUser.avatarUrlFormat({size: 1024});
-      }
-    } else {
-      const memberOrUser = context.member || context.user;
-      tag.text += memberOrUser.avatarUrlFormat({size: 1024});
-    }
-    return true;
-  },
+  //   if (arg) {
+  //     increaseNetworkRequests(tag);
+  //     const memberOrUser = await findMemberOrUser(arg, context);
+  //     if (memberOrUser) {
+  //       tag.text += memberOrUser.avatarUrlFormat({size: 1024});
+  //     }
+  //   } else {
+  //     const memberOrUser = context.member || context.user;
+  //     tag.text += memberOrUser.avatarUrlFormat({size: 1024});
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns the channel's name
-    // {channel}
-    // {channel:general}
-    // {channel:560595518129045504}
+  // [TagFunctions.CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns the channel's name
+  //   // {channel}
+  //   // {channel:general}
+  //   // {channel:560595518129045504}
 
-    if (arg) {
-      const channel = await findChannel(arg, context);
-      if (channel) {
-        tag.text += channel.name;
-      }
-    } else {
-      tag.text += (context.channel && context.guildId) ? context.channel.name : 'Direct Message';
-    }
+  //   if (arg) {
+  //     const channel = await findChannel(arg, context);
+  //     if (channel) {
+  //       tag.text += channel.name;
+  //     }
+  //   } else {
+  //     tag.text += (context.channel && context.guildId) ? context.channel.name : 'Direct Message';
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns the channel's id
-    // {channelid}
-    // {channelid:general}
-    // {channelid:560595518129045504}
+  // [TagFunctions.CHANNEL_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns the channel's id
+  //   // {channelid}
+  //   // {channelid:general}
+  //   // {channelid:560595518129045504}
 
-    if (arg) {
-      const channel = await findChannel(arg, context);
-      if (channel) {
-        tag.text += channel.id;
-      }
-    } else {
-      tag.text += context.channelId;
-    }
-    return true;
-  },
+  //   if (arg) {
+  //     const channel = await findChannel(arg, context);
+  //     if (channel) {
+  //       tag.text += channel.id;
+  //     }
+  //   } else {
+  //     tag.text += context.channelId;
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL_MENTION]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns the channel's mention
-    // {channelmention}
-    // {channelmention:general}
-    // {channelmention:560595518129045504}
+  // [TagFunctions.CHANNEL_MENTION]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns the channel's mention
+  //   // {channelmention}
+  //   // {channelmention:general}
+  //   // {channelmention:560595518129045504}
 
-    if (arg) {
-      const channel = await findChannel(arg, context);
-      if (channel) {
-        tag.text += channel.mention;
-      }
-    } else {
-      tag.text += `<#${context.channelId}>`;
-    }
-    return true;
-  },
+  //   if (arg) {
+  //     const channel = await findChannel(arg, context);
+  //     if (channel) {
+  //       tag.text += channel.mention;
+  //     }
+  //   } else {
+  //     tag.text += `<#${context.channelId}>`;
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL_RANDOM]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a random channel's name
-    // {randchannel}
+  // [TagFunctions.CHANNEL_RANDOM]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a random channel's name
+  //   // {randchannel}
 
-    if (context.guild) {
-      const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
-      tag.text += (channel) ? channel.name : '';
-    } else {
-      tag.text += 'Direct Message';
-    }
-    return true;
-  },
+  //   if (context.guild) {
+  //     const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
+  //     tag.text += (channel) ? channel.name : '';
+  //   } else {
+  //     tag.text += 'Direct Message';
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.COMPONENT_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {componentjson:COMPONENT_JSON}
+  // [TagFunctions.COMPONENT_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {componentjson:COMPONENT_JSON}
 
-    tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 1;
-    const argParsed = await parse(context, arg, '', tag.variables, tag.context, tag.limits);
-    normalizeTagResults(tag, argParsed, false);
-    tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 0;
+  //   tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 1;
+  //   const argParsed = await parse(context, arg, '', tag.variables, tag.context, tag.limits);
+  //   normalizeTagResults(tag, argParsed, false);
+  //   tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 0;
 
-    let data : any = null;
-    if (argParsed.text) {
-      try {
-        data = JSON.parse(argParsed.text);
-      } catch(error) {
-        throw new Error('Invalid Component Given');
-      }
-    }
+  //   let data : any = null;
+  //   if (argParsed.text) {
+  //     try {
+  //       data = JSON.parse(argParsed.text);
+  //     } catch(error) {
+  //       throw new Error('Invalid Component Given');
+  //     }
+  //   }
 
-    if (!data || typeof(data) !== 'object') {
-      throw new Error('Invalid Component Given');
-    }
+  //   if (!data || typeof(data) !== 'object') {
+  //     throw new Error('Invalid Component Given');
+  //   }
 
-    const components: TagResultComponents = tag.components || {components: []};
+  //   const components: TagResultComponents = tag.components || {components: []};
 
-    const component = parseComponentFromData(data);
-    components.components.push(component);
-    checkTagComponentsLimit(components);
+  //   const component = parseComponentFromData(data);
+  //   components.components.push(component);
+  //   checkTagComponentsLimit(components);
 
-    if (components.components.length) {
-      tag.components = components;
-    }
+  //   if (components.components.length) {
+  //     tag.components = components;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.COMPONENTS_ON_TIMEOUT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // execute this tagscript code on component expire
-    // {componentsontimeout:TAGSCRIPT}
+  // [TagFunctions.COMPONENTS_ON_TIMEOUT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // execute this tagscript code on component expire
+  //   // {componentsontimeout:TAGSCRIPT}
 
-    arg = arg.trim();
-    if (!arg) {
-      return false;
-    }
+  //   arg = arg.trim();
+  //   if (!arg) {
+  //     return false;
+  //   }
 
-    if (!tag.components) {
-      tag.components = {components: []};
-    }
-    tag.components.onTimeout = arg;
+  //   if (!tag.components) {
+  //     tag.components = {components: []};
+  //   }
+  //   tag.components.onTimeout = arg;
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL_RANDOM_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // return a random channel's id
-    // {randchannelid}
+  // [TagFunctions.CHANNEL_RANDOM_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // return a random channel's id
+  //   // {randchannelid}
 
-    if (context.guild) {
-      const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
-      tag.text += (channel) ? channel.id : context.channelId;
-    } else {
-      tag.text += context.channelId;
-    }
-    return true;
-  },
+  //   if (context.guild) {
+  //     const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
+  //     tag.text += (channel) ? channel.id : context.channelId;
+  //   } else {
+  //     tag.text += context.channelId;
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.CHANNEL_RANDOM_MENTION]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // return a random channel's mention
-    // {randchannelmention}
+  // [TagFunctions.CHANNEL_RANDOM_MENTION]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // return a random channel's mention
+  //   // {randchannelmention}
 
-    if (context.guild) {
-      const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
-      tag.text += (channel) ? channel.mention : `<#${context.channelId}>`;
-    } else {
-      tag.text += `<#${context.channelId}>`;
-    }
-    return true;
-  },
+  //   if (context.guild) {
+  //     const channel = randomFromIterator<Structures.Channel>(context.guild.channels.length, context.guild.channels.values());
+  //     tag.text += (channel) ? channel.mention : `<#${context.channelId}>`;
+  //   } else {
+  //     tag.text += `<#${context.channelId}>`;
+  //   }
+  //   return true;
+  // },
 
-  [TagFunctions.DISCORD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // split it up by `.`, use the first one as context[firstVariable]
+  // [TagFunctions.DISCORD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // split it up by `.`, use the first one as context[firstVariable]
 
-    // {discord:member.color}
-    // {discord:user.id}
-    return false;
-  },
+  //   // {discord:member.color}
+  //   // {discord:user.id}
+  //   return false;
+  // },
 
-  [TagFunctions.EMBED_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {embedjson:{"title": "asd"}}
+  // [TagFunctions.EMBED_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {embedjson:{"title": "asd"}}
 
-    try {
-      let object = JSON.parse(arg);
-      if (typeof(object) !== 'object') {
-        throw new Error('Invalid Embed Given');
-      }
+  //   try {
+  //     let object = JSON.parse(arg);
+  //     if (typeof(object) !== 'object') {
+  //       throw new Error('Invalid Embed Given');
+  //     }
 
-      const embed = new Embed(object);
-      if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
-        throw new Error('this error doesn\'t matter');
-      }
-      tag.embeds.push(embed);
-    } catch(error) {
-      return false;
-    }
+  //     const embed = new Embed(object);
+  //     if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
+  //       throw new Error('this error doesn\'t matter');
+  //     }
+  //     tag.embeds.push(embed);
+  //   } catch(error) {
+  //     return false;
+  //   }
 
-    if (tag.limits.MAX_EMBEDS < tag.embeds.length) {
-      throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
-    }
+  //   if (tag.limits.MAX_EMBEDS < tag.embeds.length) {
+  //     throw new Error(`Embeds surpassed max embeds length of ${tag.limits.MAX_EMBEDS}`);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.EVAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {eval:{args}}
