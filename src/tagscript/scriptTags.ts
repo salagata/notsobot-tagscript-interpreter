@@ -1,4 +1,4 @@
-import { PrivateVariables, TagSymbols } from "./tagscript.constants"; 
+import { PRIVATE_VARIABLE_PREFIX, PrivateVariables, TagSettings, TagSymbols } from "./tagscript.constants"; 
 import { TagFunctions } from "./tagFunctions";
 
 import { normalizeTagResults, parse, split } from "./compiler";
@@ -1512,163 +1512,163 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.JSON_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the channel
-    // {json.channel}
-    // {json.channel:general}
-    // {json.channel:560595518129045504}
+  // [TagFunctions.JSON_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the channel
+  //   // {json.channel}
+  //   // {json.channel:general}
+  //   // {json.channel:560595518129045504}
   
-    if (arg) {
-      const channel = await findChannel(arg, context);
-      if (channel) {
-        tag.text += JSON.stringify(channel);
-      }
-    } else if (context.channel) {
-      tag.text += JSON.stringify(context.channel);
-    } else if (context.channelId) {
-      increaseNetworkRequests(tag);
-      try {
-        const channel = await context.rest.fetchChannel(context.channelId);
-        tag.text += JSON.stringify(channel);
-      } catch(error) {
+  //   if (arg) {
+  //     const channel = await findChannel(arg, context);
+  //     if (channel) {
+  //       tag.text += JSON.stringify(channel);
+  //     }
+  //   } else if (context.channel) {
+  //     tag.text += JSON.stringify(context.channel);
+  //   } else if (context.channelId) {
+  //     increaseNetworkRequests(tag);
+  //     try {
+  //       const channel = await context.rest.fetchChannel(context.channelId);
+  //       tag.text += JSON.stringify(channel);
+  //     } catch(error) {
         
-      }
-    }
+  //     }
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the current guild
-    // {json.guild}
+  // [TagFunctions.JSON_GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the current guild
+  //   // {json.guild}
 
-    const guild = getGuildObjectForJSONSerialization(context);
-    if (guild) {
-      tag.text += JSON.stringify(guild);
-    }
+  //   const guild = getGuildObjectForJSONSerialization(context);
+  //   if (guild) {
+  //     tag.text += JSON.stringify(guild);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_MEMBER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the member
-    // {json.member}
-    // {json.member:user}
+  // [TagFunctions.JSON_MEMBER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the member
+  //   // {json.member}
+  //   // {json.member:user}
 
-    if (arg) {
-      increaseNetworkRequests(tag);
-      const memberOrUser = await findMemberOrUser(arg, context);
-      if (memberOrUser && memberOrUser instanceof Structures.Member) {
-        tag.text += JSON.stringify(memberOrUser.toJSON(true));
-      }
-    } else {
-      const memberOrUser = context.member;
-      if (memberOrUser && memberOrUser instanceof Structures.Member) {
-        tag.text += JSON.stringify(memberOrUser.toJSON(true));
-      }
-    }
+  //   if (arg) {
+  //     increaseNetworkRequests(tag);
+  //     const memberOrUser = await findMemberOrUser(arg, context);
+  //     if (memberOrUser && memberOrUser instanceof Structures.Member) {
+  //       tag.text += JSON.stringify(memberOrUser.toJSON(true));
+  //     }
+  //   } else {
+  //     const memberOrUser = context.member;
+  //     if (memberOrUser && memberOrUser instanceof Structures.Member) {
+  //       tag.text += JSON.stringify(memberOrUser.toJSON(true));
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_MEMBER_OR_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the member or user
-    // {json.memberoruser}
-    // {json.memberoruser:user}
+  // [TagFunctions.JSON_MEMBER_OR_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the member or user
+  //   // {json.memberoruser}
+  //   // {json.memberoruser:user}
 
-    if (arg) {
-      increaseNetworkRequests(tag);
-      const memberOrUser = await findMemberOrUser(arg, context);
-      if (memberOrUser) {
-        if (memberOrUser instanceof Structures.Member) {
-          tag.text += JSON.stringify(memberOrUser.toJSON(true));
-        } else {
-          tag.text += JSON.stringify(memberOrUser);
-        }
-      }
-    } else {
-      const memberOrUser = context.member || context.user;
-      if (memberOrUser instanceof Structures.Member) {
-        tag.text += JSON.stringify(memberOrUser.toJSON(true));
-      } else {
-        tag.text += JSON.stringify(memberOrUser);
-      }
-    }
+  //   if (arg) {
+  //     increaseNetworkRequests(tag);
+  //     const memberOrUser = await findMemberOrUser(arg, context);
+  //     if (memberOrUser) {
+  //       if (memberOrUser instanceof Structures.Member) {
+  //         tag.text += JSON.stringify(memberOrUser.toJSON(true));
+  //       } else {
+  //         tag.text += JSON.stringify(memberOrUser);
+  //       }
+  //     }
+  //   } else {
+  //     const memberOrUser = context.member || context.user;
+  //     if (memberOrUser instanceof Structures.Member) {
+  //       tag.text += JSON.stringify(memberOrUser.toJSON(true));
+  //     } else {
+  //       tag.text += JSON.stringify(memberOrUser);
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_MESSAGE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the message
-    // {json.message:MESSAGE_ID?}
+  // [TagFunctions.JSON_MESSAGE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the message
+  //   // {json.message:MESSAGE_ID?}
 
-    if (arg) {
-      const channel = context.channel;
-      if (channel) {
-        const member = context.member;
-        if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
-          throw new Error('You cannot view the history of this channel');
-        }
-        if (!channel.canReadHistory) {
-          throw new Error('Bot cannot view the history of this channel');
-        }
-      } else if (!context.inDm && !context.hasServerPermissions) {
-        throw new Error('Bot cannot view the history of this channel');
-      }
+  //   if (arg) {
+  //     const channel = context.channel;
+  //     if (channel) {
+  //       const member = context.member;
+  //       if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
+  //         throw new Error('You cannot view the history of this channel');
+  //       }
+  //       if (!channel.canReadHistory) {
+  //         throw new Error('Bot cannot view the history of this channel');
+  //       }
+  //     } else if (!context.inDm && !context.hasServerPermissions) {
+  //       throw new Error('Bot cannot view the history of this channel');
+  //     }
 
-      const messageId = arg.trim();
-      if (context.messages.has(messageId)) {
-        const message = context.messages.get(messageId)!;
-        if (message.channelId === context.channelId) {
-          tag.text += JSON.stringify(message);
-        }
-      } else {
-        increaseNetworkRequests(tag);
-        try {
-          const message = await context.rest.fetchMessage(context.channelId!, messageId);
-          tag.text += JSON.stringify(message);
-        } catch(error) {
+  //     const messageId = arg.trim();
+  //     if (context.messages.has(messageId)) {
+  //       const message = context.messages.get(messageId)!;
+  //       if (message.channelId === context.channelId) {
+  //         tag.text += JSON.stringify(message);
+  //       }
+  //     } else {
+  //       increaseNetworkRequests(tag);
+  //       try {
+  //         const message = await context.rest.fetchMessage(context.channelId!, messageId);
+  //         tag.text += JSON.stringify(message);
+  //       } catch(error) {
     
-        }
-      }
-    } else if (context instanceof Command.Context) {
-      tag.text += JSON.stringify(context.message);
-    }
+  //       }
+  //     }
+  //   } else if (context instanceof Command.Context) {
+  //     tag.text += JSON.stringify(context.message);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_MESSAGE_REPLY]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {json.messagereply}
+  // [TagFunctions.JSON_MESSAGE_REPLY]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {json.messagereply}
 
-    if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
-      tag.text += JSON.stringify(context.message.referencedMessage);
-    }
+  //   if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
+  //     tag.text += JSON.stringify(context.message.referencedMessage);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.JSON_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns a json object of the user
-    // {json.user}
-    // {json.user:user}
+  // [TagFunctions.JSON_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns a json object of the user
+  //   // {json.user}
+  //   // {json.user:user}
 
-    if (arg) {
-      increaseNetworkRequests(tag);
-      const memberOrUser = await findMemberOrUser(arg, context);
-      if (memberOrUser) {
-        if (memberOrUser instanceof Structures.Member) {
-          tag.text += JSON.stringify(memberOrUser.user);
-        } else {
-          tag.text += JSON.stringify(memberOrUser);
-        }
-      }
-    } else {
-      tag.text += JSON.stringify(context.user);
-    }
+  //   if (arg) {
+  //     increaseNetworkRequests(tag);
+  //     const memberOrUser = await findMemberOrUser(arg, context);
+  //     if (memberOrUser) {
+  //       if (memberOrUser instanceof Structures.Member) {
+  //         tag.text += JSON.stringify(memberOrUser.user);
+  //       } else {
+  //         tag.text += JSON.stringify(memberOrUser);
+  //       }
+  //     }
+  //   } else {
+  //     tag.text += JSON.stringify(context.user);
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.LOGICAL_AND]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {and:action|action}, unlimited actions
@@ -1803,80 +1803,80 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.LOGICAL_DELETE_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    arg = arg.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  // [TagFunctions.LOGICAL_DELETE_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   arg = arg.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
   
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      try {
-        const storageId = context.channelId!;
-        await deleteTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
-          name: arg,
-        });
-      } catch(error) {
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.channelId!;
+  //       await deleteTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
+  //         name: arg,
+  //       });
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_DELETE_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    arg = arg.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  // [TagFunctions.LOGICAL_DELETE_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   arg = arg.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
   
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      try {
-        const storageId = context.guildId || context.channelId!;
-        await deleteTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
-          name: arg,
-        });
-      } catch(error) {
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.guildId || context.channelId!;
+  //       await deleteTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
+  //         name: arg,
+  //       });
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_DELETE_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    arg = arg.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  // [TagFunctions.LOGICAL_DELETE_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   arg = arg.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < arg.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
   
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      try {
-        const storageId = context.userId;
-        await deleteTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
-          name: arg,
-        });
-      } catch(error) {
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.userId;
+  //       await deleteTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
+  //         name: arg,
+  //       });
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.LOGICAL_GET]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {get:variable-name}
@@ -1916,189 +1916,189 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.LOGICAL_GET_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {getchannel:variable-name}
-    // {getchannel:variable-name|DEFAULT VALUE HERE}
+  // [TagFunctions.LOGICAL_GET_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {getchannel:variable-name}
+  //   // {getchannel:variable-name|DEFAULT VALUE HERE}
 
-    let [ key, defaultValue ] = split(arg, 2);
-    if (key === undefined) {
-      return false;
-    }
+  //   let [ key, defaultValue ] = split(arg, 2);
+  //   if (key === undefined) {
+  //     return false;
+  //   }
 
-    key = key.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   key = key.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    if (tagId) {
-      try {
-        const storageId = context.channelId!;
-        const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
-          name: key,
-        });
-        tag.text += response.value;
-      } catch(error) {
-        if (error.response && error.response.statusCode === 404) {
-          if (defaultValue) {
-            if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
-              const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
-              normalizeTagResults(tag, argParsed, false);
-              tag.text += argParsed.text;
-            } else {
-              tag.text += defaultValue;
-            }
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.channelId!;
+  //       const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
+  //         name: key,
+  //       });
+  //       tag.text += response.value;
+  //     } catch(error) {
+  //       if (error.response && error.response.statusCode === 404) {
+  //         if (defaultValue) {
+  //           if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
+  //             const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
+  //             normalizeTagResults(tag, argParsed, false);
+  //             tag.text += argParsed.text;
+  //           } else {
+  //             tag.text += defaultValue;
+  //           }
+  //         }
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_GET_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {getglobal:variable-name}
-    // {getglobal:variable-name|DEFAULT VALUE HERE}
+  // [TagFunctions.LOGICAL_GET_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {getglobal:variable-name}
+  //   // {getglobal:variable-name|DEFAULT VALUE HERE}
 
-    let [ key, defaultValue ] = split(arg, 2);
-    if (key === undefined) {
-      return false;
-    }
+  //   let [ key, defaultValue ] = split(arg, 2);
+  //   if (key === undefined) {
+  //     return false;
+  //   }
 
-    key = key.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   key = key.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    if (tagId) {
-      try {
-        const storageId = '0';
-        const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.GLOBAL, storageId, {
-          name: key,
-        });
-        tag.text += response.value;
-      } catch(error) {
-        if (error.response && error.response.statusCode === 404) {
-          if (defaultValue) {
-            if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
-              const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
-              normalizeTagResults(tag, argParsed, false);
-              tag.text += argParsed.text;
-            } else {
-              tag.text += defaultValue;
-            }
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     try {
+  //       const storageId = '0';
+  //       const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.GLOBAL, storageId, {
+  //         name: key,
+  //       });
+  //       tag.text += response.value;
+  //     } catch(error) {
+  //       if (error.response && error.response.statusCode === 404) {
+  //         if (defaultValue) {
+  //           if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
+  //             const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
+  //             normalizeTagResults(tag, argParsed, false);
+  //             tag.text += argParsed.text;
+  //           } else {
+  //             tag.text += defaultValue;
+  //           }
+  //         }
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_GET_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {getchannel:variable-name}
-    // {getchannel:variable-name|DEFAULT VALUE HERE}
+  // [TagFunctions.LOGICAL_GET_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {getchannel:variable-name}
+  //   // {getchannel:variable-name|DEFAULT VALUE HERE}
 
-    let [ key, defaultValue ] = split(arg, 2);
-    if (key === undefined) {
-      return false;
-    }
+  //   let [ key, defaultValue ] = split(arg, 2);
+  //   if (key === undefined) {
+  //     return false;
+  //   }
 
-    key = key.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   key = key.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      try {
-        const storageId = context.guildId || context.channelId!;
-        const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
-          name: key,
-        });
-        tag.text += response.value;
-      } catch(error) {
-        if (error.response && error.response.statusCode === 404) {
-          if (defaultValue) {
-            if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
-              const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
-              normalizeTagResults(tag, argParsed, false);
-              tag.text += argParsed.text;
-            } else {
-              tag.text += defaultValue;
-            }
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.guildId || context.channelId!;
+  //       const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
+  //         name: key,
+  //       });
+  //       tag.text += response.value;
+  //     } catch(error) {
+  //       if (error.response && error.response.statusCode === 404) {
+  //         if (defaultValue) {
+  //           if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
+  //             const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
+  //             normalizeTagResults(tag, argParsed, false);
+  //             tag.text += argParsed.text;
+  //           } else {
+  //             tag.text += defaultValue;
+  //           }
+  //         }
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_GET_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {getuser:variable-name}
-    // {getuser:variable-name|DEFAULT VALUE HERE}
+  // [TagFunctions.LOGICAL_GET_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {getuser:variable-name}
+  //   // {getuser:variable-name|DEFAULT VALUE HERE}
 
-    let [ key, defaultValue ] = split(arg, 2);
-    if (key === undefined) {
-      return false;
-    }
+  //   let [ key, defaultValue ] = split(arg, 2);
+  //   if (key === undefined) {
+  //     return false;
+  //   }
 
-    key = key.trim();
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   key = key.trim();
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      try {
-        const storageId = context.userId;
-        const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
-          name: key,
-        });
-        tag.text += response.value;
-      } catch(error) {
-        if (error.response && error.response.statusCode === 404) {
-          if (defaultValue) {
-            if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
-              const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
-              normalizeTagResults(tag, argParsed, false);
-              tag.text += argParsed.text;
-            } else {
-              tag.text += defaultValue;
-            }
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     try {
+  //       const storageId = context.userId;
+  //       const response = await fetchTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
+  //         name: key,
+  //       });
+  //       tag.text += response.value;
+  //     } catch(error) {
+  //       if (error.response && error.response.statusCode === 404) {
+  //         if (defaultValue) {
+  //           if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
+  //             const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
+  //             normalizeTagResults(tag, argParsed, false);
+  //             tag.text += argParsed.text;
+  //           } else {
+  //             tag.text += defaultValue;
+  //           }
+  //         }
+  //       } else {
+  //         throw error;
+  //       }
+  //     }
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.LOGICAL_IF]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {if:statement|comparison|value|then:action|else:action|finally:action}
@@ -2356,165 +2356,168 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.LOGICAL_SET_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {setchannel:variable|value}
-    // {setchannel:lastused|{userid}}
+  // [TagFunctions.LOGICAL_SET_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {setchannel:variable|value}
+  //   // {setchannel:lastused|{userid}}
 
-    if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      return false;
-    }
+  //   if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     return false;
+  //   }
 
-    let [ key, ...value ] = split(arg);
-    key = key.trim();
+  //   let [ key, ...value ] = split(arg);
+  //   key = key.trim();
 
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
-      throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-    }
+  //   const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
+  //     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      const storageId = context.channelId!;
-      const response = await putTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
-        name: key,
-        value: storageValue,
-      });
-    }
+  //   if (tagId) {
+  //     const storageId = context.channelId!;
+  //     const response = await putTagVariable(context, tagId, TagVariableStorageTypes.CHANNEL, storageId, {
+  //       name: key,
+  //       value: storageValue,
+  //     });
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_SET_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {setglobal:variable|value}
-    // {setglobal:lastused|{userid}}
+  // [TagFunctions.LOGICAL_SET_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {setglobal:variable|value}
+  //   // {setglobal:lastused|{userid}}
 
-    if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      return false;
-    }
+  //   if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     return false;
+  //   }
 
-    let [ key, ...value ] = split(arg);
-    key = key.trim();
+  //   let [ key, ...value ] = split(arg);
+  //   key = key.trim();
 
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
-      throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-    }
+  //   const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
+  //     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    if (tagId) {
-      const storageId = '0';
-      const response = await putTagVariable(context, tagId, TagVariableStorageTypes.GLOBAL, storageId, {
-        name: key,
-        value: storageValue,
-      });
-    }
+  //   if (tagId) {
+  //     const storageId = '0';
+  //     const response = await putTagVariable(context, tagId, TagVariableStorageTypes.GLOBAL, storageId, {
+  //       name: key,
+  //       value: storageValue,
+  //     });
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_SET_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {setserver:variable|value}
-    // {setserver:lastused|{userid}}
+  // [TagFunctions.LOGICAL_SET_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {setserver:variable|value}
+  //   // {setserver:lastused|{userid}}
 
-    if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      return false;
-    }
+  //   if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     return false;
+  //   }
 
-    let [ key, ...value ] = split(arg);
-    key = key.trim();
+  //   let [ key, ...value ] = split(arg);
+  //   key = key.trim();
 
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
-      throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-    }
+  //   const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
+  //     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      const storageId = context.guildId || context.channelId!;
-      const response = await putTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
-        name: key,
-        value: storageValue,
-      });
-    }
+  //   if (tagId) {
+  //     const storageId = context.guildId || context.channelId!;
+  //     const response = await putTagVariable(context, tagId, TagVariableStorageTypes.GUILD, storageId, {
+  //       name: key,
+  //       value: storageValue,
+  //     });
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.LOGICAL_SET_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {setuser:variable|value}
-    // {setuser:lastused|{userid}}
+  // [TagFunctions.LOGICAL_SET_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {setuser:variable|value}
+  //   // {setuser:lastused|{userid}}
 
-    if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      return false;
-    }
+  //   if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     return false;
+  //   }
 
-    let [ key, ...value ] = split(arg);
-    key = key.trim();
+  //   let [ key, ...value ] = split(arg);
+  //   key = key.trim();
 
-    if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
-      throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
-    }
+  //   if (tag.limits.MAX_STORAGE_KEY_LENGTH < key.length) {
+  //     throw new Error(`Storage Variable cannot be more than ${tag.limits.MAX_STORAGE_KEY_LENGTH} characters`);
+  //   }
 
-    const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
-      throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
-    }
+  //   const storageValue = value.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   if (tag.limits.MAX_STORAGE_VALUE_LENGTH < storageValue.length) {
+  //     throw new Error(`Storage Variable Value cannot be more than ${tag.limits.MAX_STORAGE_VALUE_LENGTH} characters`);
+  //   }
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
   
-    if (tagId) {
-      const storageId = context.userId;
-      const response = await putTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
-        name: key,
-        value: storageValue,
-      });
-    }
+  //   if (tagId) {
+  //     const storageId = context.userId;
+  //     const response = await putTagVariable(context, tagId, TagVariableStorageTypes.USER, storageId, {
+  //       name: key,
+  //       value: storageValue,
+  //     });
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.MATH]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {math:5+5}
 
-    const equation = arg.trim();
+    // TESTING PURPOSES ONLY
 
-    const mathWorker = tag.context.mathWorker = tag.context.mathWorker || new MathWorker();
-    try {
-      tag.text += await mathWorker.evaluate(equation);
-    } catch(error) {
-      if (error.message.includes(MATH_ERROR_TIMEOUT_MESSAGE)) {
-        throw new Error('Math equation timed out')
-      } else {
-        throw new Error(`Math equation errored out (${error.message})`);
-      }
-    }
+    tag.text += eval(arg);
+    // const equation = arg.trim();
+
+    // const mathWorker = tag.context.mathWorker = tag.context.mathWorker || new MathWorker();
+    // try {
+    //   tag.text += await mathWorker.evaluate(equation);
+    // } catch(error) {
+    //   if (error.message.includes(MATH_ERROR_TIMEOUT_MESSAGE)) {
+    //     throw new Error('Math equation timed out')
+    //   } else {
+    //     throw new Error(`Math equation errored out (${error.message})`);
+    //   }
+    // }
 
     return true;
   },
@@ -2631,1120 +2634,1120 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.MEDIA]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get media from arg or last media
-    // {media}
-    // {media:cake}
+  // [TagFunctions.MEDIA]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get media from arg or last media
+  //   // {media}
+  //   // {media:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    const url = await lastMediaUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    }
+  //   const url = await lastMediaUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIA_AUDIO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get audio from arg or last audio
-    // {audio}
-    // {audio:cake}
+  // [TagFunctions.MEDIA_AUDIO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get audio from arg or last audio
+  //   // {audio}
+  //   // {audio:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    const url = await lastAudioUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    }
+  //   const url = await lastAudioUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIA_AUDIO_OR_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get audio/video from arg or last audio/video
-    // {av}
-    // {av:cake}
+  // [TagFunctions.MEDIA_AUDIO_OR_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get audio/video from arg or last audio/video
+  //   // {av}
+  //   // {av:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    const url = await lastAudioOrVideoUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    }
+  //   const url = await lastAudioOrVideoUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIA_IMAGE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get image from arg or last image
-    // {image}
-    // {image:cake}
+  // [TagFunctions.MEDIA_IMAGE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get image from arg or last image
+  //   // {image}
+  //   // {image:cake}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    const url = await lastImageUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    } else {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        return ScriptTags[fallbackFunction](context, arg, tag);
-      }
-    }
+  //   const url = await lastImageUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   } else {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       return ScriptTags[fallbackFunction](context, arg, tag);
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIA_IMAGE_EDIT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // edit an image based off a prompt, empty will auto generate one
-    // {edit:PROMPT?|MEDIA_URL?}
-    // {edit:pixelate the image}
-    // {edit:pixelate the image|cake}
-    // {edit:|cake}
+  // [TagFunctions.MEDIA_IMAGE_EDIT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // edit an image based off a prompt, empty will auto generate one
+  //   // {edit:PROMPT?|MEDIA_URL?}
+  //   // {edit:pixelate the image}
+  //   // {edit:pixelate the image|cake}
+  //   // {edit:|cake}
 
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
 
-    increaseNetworkRequests(tag);
-    increaseNetworkRequestsML(tag);
+  //   increaseNetworkRequests(tag);
+  //   increaseNetworkRequestsML(tag);
   
-    const maxFileSize = context.maxAttachmentSize;
-
-    let prompt: string;
-    let mediaString: string = '';
-    if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      const parts = split(arg);
-
-      mediaString = parts.pop()!;
-      prompt = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    } else {
-      prompt = arg;
-    }
-
-    let url = await lastImageUrl(mediaString.trim(), context);
-    if (!url) {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        const textCache = tag.text;
-
-        tag.text = '';
-        await ScriptTags[fallbackFunction](context, mediaString, tag);
-        url = tag.text;
-        tag.text = textCache;
-      }
-    }
-
-    if (!url) {
-      return false;
-    }
-
-    const job = await utilitiesMLEdit(context, {
-      query: prompt,
-      doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
-      model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      safe: DefaultParameters.safe(context),
-      urls: [url],
-    },
-    ).then((x) => jobWaitForResult(context, x));
-    if (job.result.error) {
-      throw new Error(`**Job Error**: ${job.result.error}`);
-    }
-    if (!job.result.response) {
-      throw new Error('Edit did not return a response (Should not happen, report this)');
-    }
-
-    const response = job.result.response;
-    const filename = response.file.filename_safe;
-
-    const data = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-    if (maxFileSize < data.length) {
-      throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-    }
-
-    /*
-    const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-    if (maxFileSize <= currentFileSize + data.length) {
-      throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-    }
-    */
-    tag.variables[PrivateVariables.FILE_SIZE] += data.length;
-
-    tag.files.push({
-      buffer: data,
-      filename,
-      spoiler: false,
-      url: '',
-    });
-
-    return true;
-  },
-
-  [TagFunctions.MEDIA_IMAGE_EDIT_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // edit an image based off a prompt, empty will auto generate one
-    // {editurl:PROMPT?|MEDIA_URL?}
-    // {editurl:pixelate the image}
-    // {editurl:pixelate the image|cake}
-    // {editurl:|cake}
-
-    increaseNetworkRequests(tag);
-    increaseNetworkRequestsML(tag);
-
-    let prompt: string;
-    let mediaString: string = '';
-    if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      const parts = split(arg);
-
-      mediaString = parts.pop()!;
-      prompt = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-    } else {
-      prompt = arg;
-    }
-
-    let url = await lastImageUrl(mediaString.trim(), context);
-    if (!url) {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        const textCache = tag.text;
-
-        tag.text = '';
-        await ScriptTags[fallbackFunction](context, mediaString, tag);
-        url = tag.text;
-        tag.text = textCache;
-      }
-    }
-
-    if (!url) {
-      return true;
-    }
-
-    const job = await utilitiesMLEdit(context, {
-      query: prompt,
-      doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
-      model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      safe: DefaultParameters.safe(context),
-      upload: true,
-      urls: [url],
-    }).then((x) => jobWaitForResult(context, x));
-    if (job.result.error) {
-      throw new Error(`**Job Error**: ${job.result.error}`);
-    }
-    if (!job.result.response) {
-      throw new Error('Edit did not return a response (Should not happen, report this)');
-    }
-
-    const response = job.result.response;
-    if (response.storage) {
-      tag.text += response.storage.urls.cdn;
-    }
-
-    return true;
-  },
-
-  [TagFunctions.MEDIA_IMAGE_IMAGINE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // imagine an image based off a prompt, empty will auto generate one
-    // {imagine}
-    // {imagine:cake}
-
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
-
-    increaseNetworkRequests(tag);
-    increaseNetworkRequestsML(tag);
-
-    const maxFileSize = context.maxAttachmentSize;
-
-    const job = await utilitiesMLImagine(context, {
-      query: arg,
-      doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
-      model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      safe: DefaultParameters.safe(context),
-    }).then((x) => jobWaitForResult(context, x));
-    if (job.result.error) {
-      throw new Error(`**Job Error**: ${job.result.error}`);
-    }
-    if (!job.result.response) {
-      throw new Error('Imagine did not return a response (Should not happen, report this)');
-    }
-
-    const response = job.result.response;
-    const filename = response.file.filename_safe;
-
-    const data = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-    if (maxFileSize < data.length) {
-      throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-    }
-
-    /*
-    const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
-    if (maxFileSize <= currentFileSize + data.length) {
-      throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
-    }
-    */
-    tag.variables[PrivateVariables.FILE_SIZE] += data.length;
-
-    tag.files.push({
-      buffer: data,
-      filename,
-      spoiler: false,
-      url: '',
-    });
-
-    return true;
-  },
-
-  [TagFunctions.MEDIA_IMAGE_IMAGINE_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // imagine an image based off a prompt, empty will auto generate one, will return a url
-    // {imagineurl}
-    // {imagineurl:cake}
-
-    increaseNetworkRequests(tag);
-    increaseNetworkRequestsML(tag);
-
-    const job = await utilitiesMLImagine(context, {
-      query: arg,
-      doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
-      model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      safe: DefaultParameters.safe(context),
-      upload: true,
-    }).then((x) => jobWaitForResult(context, x));
-    if (job.result.error) {
-      throw new Error(`**Job Error**: ${job.result.error}`);
-    }
-    if (!job.result.response) {
-      throw new Error('Imagine did not return a response (Should not happen, report this)');
-    }
-
-    const response = job.result.response;
-    if (response.storage) {
-      tag.text += response.storage.urls.cdn;
-    }
-
-    return true;
-  },
-
-  [TagFunctions.MEDIA_IMAGE_OR_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get image/video from arg or last image/video
-    // {iv}
-    // {iv:cake}
-
-    increaseNetworkRequests(tag);
-
-    const url = await lastImageOrVideoUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    } else {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        return ScriptTags[fallbackFunction](context, arg, tag);
-      }
-    }
-
-    return true;
-  },
-
-  [TagFunctions.MEDIA_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get video from arg or last video
-    // {video}
-    // {video:cake}
-
-    increaseNetworkRequests(tag);
-
-    const url = await lastVideoUrl(arg.trim(), context);
-    if (url) {
-      tag.text += url;
-    }
-
-    return true;
-  },
-
-  [TagFunctions.MESSAGE_CONTENT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get message content from a message id
-    // {messagecontent:MESSAGE_ID?|CHANNEL?}
-
-    if (arg) {
-      const [ messageId, channelQuery ] = split(arg, 2);
-      if (!messageId) {
-        return true;
-      }
-
-      let channelId: string = '';
-      let channel: Structures.Channel | null = null;
-      if (channelQuery) {
-        increaseNetworkRequests(tag); // if its a snowflake, just check cache?
-        channel = await findChannel(channelQuery, context);
-        if (!channel || !channel.isText) {
-          return true;
-        }
-        channelId = channel.id;
-      } else {
-        channel = context.channel;
-        channelId = context.channelId!; // we dont get channel objects in dms
-      }
-
-      if (channel) {
-        const member = context.member;
-        if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
-          throw new Error('You cannot view the history of this channel');
-        }
-        if (!channel.canReadHistory) {
-          throw new Error('Bot cannot view the history of this channel');
-        }
-      } else if (!context.inDm && !context.hasServerPermissions) {
-        throw new Error('Bot cannot view the history of this channel');
-      }
-
-      let message: Structures.Message | undefined;
-      if (context.messages.has(messageId)) {
-        message = context.messages.get(messageId)!;
-      } else {
-        increaseNetworkRequests(tag);
-        try {
-          message = await context.rest.fetchMessage(channelId, messageId);
-        } catch(error) {
-
-        }
-      }
-      if (message && message.channelId === channelId) {
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          return true;
-        }
-        tag.text += message.content;
-      }
-    } else if (context instanceof Command.Context) {
-      tag.text += context.message.content;
-    }
-
-    return true;
-  },
-
-  [TagFunctions.MESSAGE_LAST_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get a random message id from the past 100 messages in a channel
-    // {messagelastid:NUMBER?|CHANNEL_ID?}
-
-    const [ indexQuery, channelQuery ] = split(arg, 2);
-
-    let index: number = 0;
-    if (indexQuery === 'random' || !isNaN(indexQuery as any)) {
-      if (indexQuery === 'random') {
-        index = -1;
-      } else if (!isNaN(indexQuery as any)) {
-        index = parseInt(indexQuery);
-        if (isNaN(index)) {
-          index = 0;
-        }
-      }
-    }
-
-    if (100 <= index) {
-      throw new Error('Message index cannot be over 99');
-    }
-
-    let channelId: string = '';
-    let channel: Structures.Channel | null = null;
-    if (channelQuery) {
-      increaseNetworkRequests(tag); // if its a snowflake, just check cache?
-      channel = await findChannel(channelQuery, context);
-      if (!channel || !channel.isText) {
-        return true;
-      }
-      channelId = channel.id;
-    } else {
-      channel = context.channel;
-      channelId = context.channelId!; // we dont get channel objects in dms
-    }
-
-    if (channel) {
-      const member = context.member;
-      if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
-        throw new Error('You cannot view the history of this channel');
-      }
-      if (!channel.canReadHistory) {
-        throw new Error('Bot cannot view the history of this channel');
-      }
-    } else if (!context.inDm && !context.hasServerPermissions) {
-      throw new Error('Bot cannot view the history of this channel');
-    }
-
-    // maybe dont show the bot's messages?
-
-    const MAX_LIMIT = (index === -1) ? 100 : Math.min(100, index + 1);
-
-    const messagesFound: Array<Structures.Message> = [];
-
-    let before: string | undefined;
-    if (channel) {
-      // maybe make this use not the channel object (for dms)?
-      for (let message of channel.messages.toArray().reverse()) {
-        if (MAX_LIMIT <= messagesFound.length) {
-          break;
-        }
-        if (context instanceof Command.Context && message.id === context.messageId) {
-          continue;
-        }
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          continue;
-        }
-        messagesFound.push(message);
-        before = message.id;
-      }
-    }
-
-    if (messagesFound.length < MAX_LIMIT) {
-      increaseNetworkRequests(tag);
-
-      const limit = MAX_LIMIT - messagesFound.length;
-      const messages = await context.rest.fetchMessages(channelId, {before, limit});
-      for (let message of messages.toArray()) {
-        if (limit <= messagesFound.length) {
-          break;
-        }
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          continue;
-        }
-        messagesFound.push(message);
-        before = message.id;
-      }
-    }
-
-    if (index === -1) {
-      const message = randomFromArray(messagesFound);
-      tag.text += message.id;
-    } else if (index in messagesFound) {
-      const message = messagesFound[index];
-      if (message) {
-        tag.text += message.id;
-      }
-    }
+  //   const maxFileSize = context.maxAttachmentSize;
+
+  //   let prompt: string;
+  //   let mediaString: string = '';
+  //   if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     const parts = split(arg);
+
+  //     mediaString = parts.pop()!;
+  //     prompt = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   } else {
+  //     prompt = arg;
+  //   }
+
+  //   let url = await lastImageUrl(mediaString.trim(), context);
+  //   if (!url) {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       const textCache = tag.text;
+
+  //       tag.text = '';
+  //       await ScriptTags[fallbackFunction](context, mediaString, tag);
+  //       url = tag.text;
+  //       tag.text = textCache;
+  //     }
+  //   }
+
+  //   if (!url) {
+  //     return false;
+  //   }
+
+  //   const job = await utilitiesMLEdit(context, {
+  //     query: prompt,
+  //     doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
+  //     model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     safe: DefaultParameters.safe(context),
+  //     urls: [url],
+  //   },
+  //   ).then((x) => jobWaitForResult(context, x));
+  //   if (job.result.error) {
+  //     throw new Error(`**Job Error**: ${job.result.error}`);
+  //   }
+  //   if (!job.result.response) {
+  //     throw new Error('Edit did not return a response (Should not happen, report this)');
+  //   }
+
+  //   const response = job.result.response;
+  //   const filename = response.file.filename_safe;
+
+  //   const data = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //   if (maxFileSize < data.length) {
+  //     throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //   }
+
+  //   /*
+  //   const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+  //   if (maxFileSize <= currentFileSize + data.length) {
+  //     throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+  //   }
+  //   */
+  //   tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+
+  //   tag.files.push({
+  //     buffer: data,
+  //     filename,
+  //     spoiler: false,
+  //     url: '',
+  //   });
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MEDIA_IMAGE_EDIT_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // edit an image based off a prompt, empty will auto generate one
+  //   // {editurl:PROMPT?|MEDIA_URL?}
+  //   // {editurl:pixelate the image}
+  //   // {editurl:pixelate the image|cake}
+  //   // {editurl:|cake}
+
+  //   increaseNetworkRequests(tag);
+  //   increaseNetworkRequestsML(tag);
+
+  //   let prompt: string;
+  //   let mediaString: string = '';
+  //   if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     const parts = split(arg);
+
+  //     mediaString = parts.pop()!;
+  //     prompt = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //   } else {
+  //     prompt = arg;
+  //   }
+
+  //   let url = await lastImageUrl(mediaString.trim(), context);
+  //   if (!url) {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       const textCache = tag.text;
+
+  //       tag.text = '';
+  //       await ScriptTags[fallbackFunction](context, mediaString, tag);
+  //       url = tag.text;
+  //       tag.text = textCache;
+  //     }
+  //   }
+
+  //   if (!url) {
+  //     return true;
+  //   }
+
+  //   const job = await utilitiesMLEdit(context, {
+  //     query: prompt,
+  //     doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
+  //     model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     safe: DefaultParameters.safe(context),
+  //     upload: true,
+  //     urls: [url],
+  //   }).then((x) => jobWaitForResult(context, x));
+  //   if (job.result.error) {
+  //     throw new Error(`**Job Error**: ${job.result.error}`);
+  //   }
+  //   if (!job.result.response) {
+  //     throw new Error('Edit did not return a response (Should not happen, report this)');
+  //   }
+
+  //   const response = job.result.response;
+  //   if (response.storage) {
+  //     tag.text += response.storage.urls.cdn;
+  //   }
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MEDIA_IMAGE_IMAGINE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // imagine an image based off a prompt, empty will auto generate one
+  //   // {imagine}
+  //   // {imagine:cake}
+
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
+
+  //   increaseNetworkRequests(tag);
+  //   increaseNetworkRequestsML(tag);
+
+  //   const maxFileSize = context.maxAttachmentSize;
+
+  //   const job = await utilitiesMLImagine(context, {
+  //     query: arg,
+  //     doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
+  //     model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     safe: DefaultParameters.safe(context),
+  //   }).then((x) => jobWaitForResult(context, x));
+  //   if (job.result.error) {
+  //     throw new Error(`**Job Error**: ${job.result.error}`);
+  //   }
+  //   if (!job.result.response) {
+  //     throw new Error('Imagine did not return a response (Should not happen, report this)');
+  //   }
+
+  //   const response = job.result.response;
+  //   const filename = response.file.filename_safe;
+
+  //   const data = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //   if (maxFileSize < data.length) {
+  //     throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //   }
+
+  //   /*
+  //   const currentFileSize = tag.variables[PrivateVariables.FILE_SIZE];
+  //   if (maxFileSize <= currentFileSize + data.length) {
+  //     throw new Error(`Attachments surpassed max file size of ${maxFileSize} bytes`);
+  //   }
+  //   */
+  //   tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+
+  //   tag.files.push({
+  //     buffer: data,
+  //     filename,
+  //     spoiler: false,
+  //     url: '',
+  //   });
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MEDIA_IMAGE_IMAGINE_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // imagine an image based off a prompt, empty will auto generate one, will return a url
+  //   // {imagineurl}
+  //   // {imagineurl:cake}
+
+  //   increaseNetworkRequests(tag);
+  //   increaseNetworkRequestsML(tag);
+
+  //   const job = await utilitiesMLImagine(context, {
+  //     query: arg,
+  //     doNotError: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_DO_NOT_ERROR],
+  //     model: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     safe: DefaultParameters.safe(context),
+  //     upload: true,
+  //   }).then((x) => jobWaitForResult(context, x));
+  //   if (job.result.error) {
+  //     throw new Error(`**Job Error**: ${job.result.error}`);
+  //   }
+  //   if (!job.result.response) {
+  //     throw new Error('Imagine did not return a response (Should not happen, report this)');
+  //   }
+
+  //   const response = job.result.response;
+  //   if (response.storage) {
+  //     tag.text += response.storage.urls.cdn;
+  //   }
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MEDIA_IMAGE_OR_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get image/video from arg or last image/video
+  //   // {iv}
+  //   // {iv:cake}
+
+  //   increaseNetworkRequests(tag);
+
+  //   const url = await lastImageOrVideoUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   } else {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_IV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       return ScriptTags[fallbackFunction](context, arg, tag);
+  //     }
+  //   }
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MEDIA_VIDEO]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get video from arg or last video
+  //   // {video}
+  //   // {video:cake}
+
+  //   increaseNetworkRequests(tag);
+
+  //   const url = await lastVideoUrl(arg.trim(), context);
+  //   if (url) {
+  //     tag.text += url;
+  //   }
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MESSAGE_CONTENT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get message content from a message id
+  //   // {messagecontent:MESSAGE_ID?|CHANNEL?}
+
+  //   if (arg) {
+  //     const [ messageId, channelQuery ] = split(arg, 2);
+  //     if (!messageId) {
+  //       return true;
+  //     }
+
+  //     let channelId: string = '';
+  //     let channel: Structures.Channel | null = null;
+  //     if (channelQuery) {
+  //       increaseNetworkRequests(tag); // if its a snowflake, just check cache?
+  //       channel = await findChannel(channelQuery, context);
+  //       if (!channel || !channel.isText) {
+  //         return true;
+  //       }
+  //       channelId = channel.id;
+  //     } else {
+  //       channel = context.channel;
+  //       channelId = context.channelId!; // we dont get channel objects in dms
+  //     }
+
+  //     if (channel) {
+  //       const member = context.member;
+  //       if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
+  //         throw new Error('You cannot view the history of this channel');
+  //       }
+  //       if (!channel.canReadHistory) {
+  //         throw new Error('Bot cannot view the history of this channel');
+  //       }
+  //     } else if (!context.inDm && !context.hasServerPermissions) {
+  //       throw new Error('Bot cannot view the history of this channel');
+  //     }
+
+  //     let message: Structures.Message | undefined;
+  //     if (context.messages.has(messageId)) {
+  //       message = context.messages.get(messageId)!;
+  //     } else {
+  //       increaseNetworkRequests(tag);
+  //       try {
+  //         message = await context.rest.fetchMessage(channelId, messageId);
+  //       } catch(error) {
+
+  //       }
+  //     }
+  //     if (message && message.channelId === channelId) {
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         return true;
+  //       }
+  //       tag.text += message.content;
+  //     }
+  //   } else if (context instanceof Command.Context) {
+  //     tag.text += context.message.content;
+  //   }
+
+  //   return true;
+  // },
+
+  // [TagFunctions.MESSAGE_LAST_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get a random message id from the past 100 messages in a channel
+  //   // {messagelastid:NUMBER?|CHANNEL_ID?}
+
+  //   const [ indexQuery, channelQuery ] = split(arg, 2);
+
+  //   let index: number = 0;
+  //   if (indexQuery === 'random' || !isNaN(indexQuery as any)) {
+  //     if (indexQuery === 'random') {
+  //       index = -1;
+  //     } else if (!isNaN(indexQuery as any)) {
+  //       index = parseInt(indexQuery);
+  //       if (isNaN(index)) {
+  //         index = 0;
+  //       }
+  //     }
+  //   }
+
+  //   if (100 <= index) {
+  //     throw new Error('Message index cannot be over 99');
+  //   }
+
+  //   let channelId: string = '';
+  //   let channel: Structures.Channel | null = null;
+  //   if (channelQuery) {
+  //     increaseNetworkRequests(tag); // if its a snowflake, just check cache?
+  //     channel = await findChannel(channelQuery, context);
+  //     if (!channel || !channel.isText) {
+  //       return true;
+  //     }
+  //     channelId = channel.id;
+  //   } else {
+  //     channel = context.channel;
+  //     channelId = context.channelId!; // we dont get channel objects in dms
+  //   }
+
+  //   if (channel) {
+  //     const member = context.member;
+  //     if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
+  //       throw new Error('You cannot view the history of this channel');
+  //     }
+  //     if (!channel.canReadHistory) {
+  //       throw new Error('Bot cannot view the history of this channel');
+  //     }
+  //   } else if (!context.inDm && !context.hasServerPermissions) {
+  //     throw new Error('Bot cannot view the history of this channel');
+  //   }
+
+  //   // maybe dont show the bot's messages?
+
+  //   const MAX_LIMIT = (index === -1) ? 100 : Math.min(100, index + 1);
+
+  //   const messagesFound: Array<Structures.Message> = [];
+
+  //   let before: string | undefined;
+  //   if (channel) {
+  //     // maybe make this use not the channel object (for dms)?
+  //     for (let message of channel.messages.toArray().reverse()) {
+  //       if (MAX_LIMIT <= messagesFound.length) {
+  //         break;
+  //       }
+  //       if (context instanceof Command.Context && message.id === context.messageId) {
+  //         continue;
+  //       }
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         continue;
+  //       }
+  //       messagesFound.push(message);
+  //       before = message.id;
+  //     }
+  //   }
+
+  //   if (messagesFound.length < MAX_LIMIT) {
+  //     increaseNetworkRequests(tag);
+
+  //     const limit = MAX_LIMIT - messagesFound.length;
+  //     const messages = await context.rest.fetchMessages(channelId, {before, limit});
+  //     for (let message of messages.toArray()) {
+  //       if (limit <= messagesFound.length) {
+  //         break;
+  //       }
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         continue;
+  //       }
+  //       messagesFound.push(message);
+  //       before = message.id;
+  //     }
+  //   }
+
+  //   if (index === -1) {
+  //     const message = randomFromArray(messagesFound);
+  //     tag.text += message.id;
+  //   } else if (index in messagesFound) {
+  //     const message = messagesFound[index];
+  //     if (message) {
+  //       tag.text += message.id;
+  //     }
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MESSAGE_RANDOM_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get a random message id from the past 100 messages in a channel
-    // {randmessageid:CHANNEL_ID?}
+  // [TagFunctions.MESSAGE_RANDOM_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get a random message id from the past 100 messages in a channel
+  //   // {randmessageid:CHANNEL_ID?}
 
-    const channelQuery = arg.trim();
+  //   const channelQuery = arg.trim();
 
-    let channelId: string = '';
-    let channel: Structures.Channel | null = null;
-    if (channelQuery) {
-      increaseNetworkRequests(tag); // if its a snowflake, just check cache?
-      channel = await findChannel(channelQuery, context);
-      if (!channel || !channel.isText) {
-        return true;
-      }
-      channelId = channel.id;
-    } else {
-      channel = context.channel;
-      channelId = context.channelId!; // we dont get channel objects in dms
-    }
+  //   let channelId: string = '';
+  //   let channel: Structures.Channel | null = null;
+  //   if (channelQuery) {
+  //     increaseNetworkRequests(tag); // if its a snowflake, just check cache?
+  //     channel = await findChannel(channelQuery, context);
+  //     if (!channel || !channel.isText) {
+  //       return true;
+  //     }
+  //     channelId = channel.id;
+  //   } else {
+  //     channel = context.channel;
+  //     channelId = context.channelId!; // we dont get channel objects in dms
+  //   }
 
-    if (channel) {
-      const member = context.member;
-      if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
-        throw new Error('You cannot view the history of this channel');
-      }
-      if (!channel.canReadHistory) {
-        throw new Error('Bot cannot view the history of this channel');
-      }
-    } else if (!context.inDm && !context.hasServerPermissions) {
-      throw new Error('Bot cannot view the history of this channel');
-    }
+  //   if (channel) {
+  //     const member = context.member;
+  //     if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
+  //       throw new Error('You cannot view the history of this channel');
+  //     }
+  //     if (!channel.canReadHistory) {
+  //       throw new Error('Bot cannot view the history of this channel');
+  //     }
+  //   } else if (!context.inDm && !context.hasServerPermissions) {
+  //     throw new Error('Bot cannot view the history of this channel');
+  //   }
 
-    // maybe dont show the bot's messages?
+  //   // maybe dont show the bot's messages?
 
-    const MAX_LIMIT = 100;
+  //   const MAX_LIMIT = 100;
 
-    const messagesFound: Array<Structures.Message> = [];
+  //   const messagesFound: Array<Structures.Message> = [];
 
-    let before: string | undefined;
-    if (channel) {
-      // maybe make this use not the channel object (for dms)?
-      for (let message of channel.messages.toArray().reverse()) {
-        if (MAX_LIMIT <= messagesFound.length) {
-          break;
-        }
-        if (context instanceof Command.Context && message.id === context.messageId) {
-          continue;
-        }
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          continue;
-        }
-        messagesFound.push(message);
-        before = message.id;
-      }
-    }
+  //   let before: string | undefined;
+  //   if (channel) {
+  //     // maybe make this use not the channel object (for dms)?
+  //     for (let message of channel.messages.toArray().reverse()) {
+  //       if (MAX_LIMIT <= messagesFound.length) {
+  //         break;
+  //       }
+  //       if (context instanceof Command.Context && message.id === context.messageId) {
+  //         continue;
+  //       }
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         continue;
+  //       }
+  //       messagesFound.push(message);
+  //       before = message.id;
+  //     }
+  //   }
 
-    if (messagesFound.length < MAX_LIMIT) {
-      increaseNetworkRequests(tag);
+  //   if (messagesFound.length < MAX_LIMIT) {
+  //     increaseNetworkRequests(tag);
 
-      const limit = MAX_LIMIT - messagesFound.length;
-      const messages = await context.rest.fetchMessages(channelId, {before, limit});
-      for (let message of messages.toArray()) {
-        if (limit <= messagesFound.length) {
-          break;
-        }
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          continue;
-        }
-        messagesFound.push(message);
-        before = message.id;
-      }
-    }
+  //     const limit = MAX_LIMIT - messagesFound.length;
+  //     const messages = await context.rest.fetchMessages(channelId, {before, limit});
+  //     for (let message of messages.toArray()) {
+  //       if (limit <= messagesFound.length) {
+  //         break;
+  //       }
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         continue;
+  //       }
+  //       messagesFound.push(message);
+  //       before = message.id;
+  //     }
+  //   }
 
-    const message = randomFromArray(messagesFound);
-    tag.text += message.id;
+  //   const message = randomFromArray(messagesFound);
+  //   tag.text += message.id;
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MESSAGE_USER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // get a message's author's id
-    // {messageuserid:MESSAGE_ID?|CHANNEL_ID?}
+  // [TagFunctions.MESSAGE_USER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // get a message's author's id
+  //   // {messageuserid:MESSAGE_ID?|CHANNEL_ID?}
 
-    if (arg) {
-      const [ messageId, channelQuery ] = split(arg, 2);
-      if (!messageId) {
-        return true;
-      }
+  //   if (arg) {
+  //     const [ messageId, channelQuery ] = split(arg, 2);
+  //     if (!messageId) {
+  //       return true;
+  //     }
 
-      let channelId: string = '';
-      let channel: Structures.Channel | null = null;
-      if (channelQuery) {
-        increaseNetworkRequests(tag); // if its a snowflake, just check cache?
-        channel = await findChannel(channelQuery, context);
-        if (!channel || !channel.isText) {
-          return true;
-        }
-        channelId = channel.id;
-      } else {
-        channel = context.channel;
-        channelId = context.channelId!; // we dont get channel objects in dms
-      }
+  //     let channelId: string = '';
+  //     let channel: Structures.Channel | null = null;
+  //     if (channelQuery) {
+  //       increaseNetworkRequests(tag); // if its a snowflake, just check cache?
+  //       channel = await findChannel(channelQuery, context);
+  //       if (!channel || !channel.isText) {
+  //         return true;
+  //       }
+  //       channelId = channel.id;
+  //     } else {
+  //       channel = context.channel;
+  //       channelId = context.channelId!; // we dont get channel objects in dms
+  //     }
 
-      if (channel) {
-        const member = context.member;
-        if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
-          throw new Error('You cannot view the history of this channel');
-        }
-        if (!channel.canReadHistory) {
-          throw new Error('Bot cannot view the history of this channel');
-        }
-      } else if (!context.inDm && !context.hasServerPermissions) {
-        throw new Error('Bot cannot view the history of this channel');
-      }
+  //     if (channel) {
+  //       const member = context.member;
+  //       if (member && !channel.can([Permissions.VIEW_CHANNEL, Permissions.READ_MESSAGE_HISTORY], member)) {
+  //         throw new Error('You cannot view the history of this channel');
+  //       }
+  //       if (!channel.canReadHistory) {
+  //         throw new Error('Bot cannot view the history of this channel');
+  //       }
+  //     } else if (!context.inDm && !context.hasServerPermissions) {
+  //       throw new Error('Bot cannot view the history of this channel');
+  //     }
 
-      let message: Structures.Message | undefined;
-      if (context.messages.has(messageId)) {
-        message = context.messages.get(messageId)!;
-      } else {
-        increaseNetworkRequests(tag);
-        try {
-          message = await context.rest.fetchMessage(channelId, messageId);
-        } catch(error) {
+  //     let message: Structures.Message | undefined;
+  //     if (context.messages.has(messageId)) {
+  //       message = context.messages.get(messageId)!;
+  //     } else {
+  //       increaseNetworkRequests(tag);
+  //       try {
+  //         message = await context.rest.fetchMessage(channelId, messageId);
+  //       } catch(error) {
       
-        }
-      }
-      if (message && message.channelId === channelId) {
-        if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
-          return true;
-        }
-        tag.text += message.author.id;
-      }
-    } else if (context instanceof Command.Context) {
-      tag.text += context.message.author.id;
-    }
+  //       }
+  //     }
+  //     if (message && message.channelId === channelId) {
+  //       if (message.interaction && message.hasFlagEphemeral && message.interaction.user.id !== context.userId) {
+  //         return true;
+  //       }
+  //       tag.text += message.author.id;
+  //     }
+  //   } else if (context instanceof Command.Context) {
+  //     tag.text += context.message.author.id;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
  
-  [TagFunctions.MEDIASCRIPT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // mediascript 1
-    // {mediascript:mediascript code here}
+  // [TagFunctions.MEDIASCRIPT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // mediascript 1
+  //   // {mediascript:mediascript code here}
 
-    if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
-      throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
-    }
+  //   if (tag.limits.MAX_ATTACHMENTS <= tag.files.length) {
+  //     throw new Error(`Attachments surpassed max attachments length of ${tag.limits.MAX_ATTACHMENTS}`);
+  //   }
 
-    let code = arg.trim();
-    if (!code) {
-      return false;
-    }
+  //   let code = arg.trim();
+  //   if (!code) {
+  //     return false;
+  //   }
 
-    const files: Array<RequestFile> = [];
-    const keyCache: Record<string, string> = {};
-    code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
-      if (!(group1 in keyCache)) {
-        keyCache[group1] = `FILE_${files.length + 1}`;
+  //   const files: Array<RequestFile> = [];
+  //   const keyCache: Record<string, string> = {};
+  //   code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
+  //     if (!(group1 in keyCache)) {
+  //       keyCache[group1] = `FILE_${files.length + 1}`;
 
-        const file = tag.files[parseInt(group1) - 1];
-        if (!file) {
-          throw new Error('Invalid FILE_ Provided');
-        }
-        if (!file.buffer) {
-          return file.url;
-        }
+  //       const file = tag.files[parseInt(group1) - 1];
+  //       if (!file) {
+  //         throw new Error('Invalid FILE_ Provided');
+  //       }
+  //       if (!file.buffer) {
+  //         return file.url;
+  //       }
 
-        files.push({filename: file.filename, value: file.buffer});
-        if (!group2) {
-          // kill it from tag.files
-          file.deleted = true;
-        }
-      }
-      return keyCache[group1];
-    });
+  //       files.push({filename: file.filename, value: file.buffer});
+  //       if (!group2) {
+  //         // kill it from tag.files
+  //         file.deleted = true;
+  //       }
+  //     }
+  //     return keyCache[group1];
+  //   });
 
-    for (let i = 0; i < tag.files.length; i++) {
-      if (tag.files[i].deleted) {
-        tag.files.splice(i, 1);
-      }
-    }
+  //   for (let i = 0; i < tag.files.length; i++) {
+  //     if (tag.files[i].deleted) {
+  //       tag.files.splice(i, 1);
+  //     }
+  //   }
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    try {
-      const job = await utilitiesMediascript(context, {
-        code,
-        files,
-        maxFileSizeStrict: true,
-        mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      }).then((x) => jobWaitForResult(context, x));
-      if (job.result.error) {
-        throw new Error(`**MediaScript Error**: ${job.result.error}`);
-      }
-      if (!job.result.response) {
-        throw new Error('MediaScript did not return a response (Should not happen, report this)');
-      }
+  //   try {
+  //     const job = await utilitiesMediascript(context, {
+  //       code,
+  //       files,
+  //       maxFileSizeStrict: true,
+  //       mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     }).then((x) => jobWaitForResult(context, x));
+  //     if (job.result.error) {
+  //       throw new Error(`**MediaScript Error**: ${job.result.error}`);
+  //     }
+  //     if (!job.result.response) {
+  //       throw new Error('MediaScript did not return a response (Should not happen, report this)');
+  //     }
 
-      const response = job.result.response;
-      if (response.arguments) {
-        for (let key in response.arguments) {
-          await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
-        }
-      }
+  //     const response = job.result.response;
+  //     if (response.arguments) {
+  //       for (let key in response.arguments) {
+  //         await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
+  //       }
+  //     }
 
-      const filename = response.file.filename_safe;
+  //     const filename = response.file.filename_safe;
       
-      let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-      if (response.file.metadata.mimetype.startsWith('text/')) {
-        data = data.toString();
-      }
+  //     let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //     if (response.file.metadata.mimetype.startsWith('text/')) {
+  //       data = data.toString();
+  //     }
 
-      const maxFileSize = context.maxAttachmentSize;
-      if (maxFileSize < data.length) {
-        throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-      }
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     if (maxFileSize < data.length) {
+  //       throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //     }
       
-      tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+  //     tag.variables[PrivateVariables.FILE_SIZE] += data.length;
       
-      tag.files.push({
-        buffer: data,
-        filename,
-        spoiler: false,
-        url: '',
-      });
+  //     tag.files.push({
+  //       buffer: data,
+  //       filename,
+  //       spoiler: false,
+  //       url: '',
+  //     });
 
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIASCRIPT_MAYBE_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {mediascriptmaybeurl:mediascript code here}
+  // [TagFunctions.MEDIASCRIPT_MAYBE_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {mediascriptmaybeurl:mediascript code here}
 
-    let code = arg.trim();
-    if (!code) {
-      return false;
-    }
+  //   let code = arg.trim();
+  //   if (!code) {
+  //     return false;
+  //   }
 
-    const files: Array<RequestFile> = [];
-    const keyCache: Record<string, string> = {};
-    code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
-      if (!(group1 in keyCache)) {
-        keyCache[group1] = `FILE_${files.length + 1}`;
+  //   const files: Array<RequestFile> = [];
+  //   const keyCache: Record<string, string> = {};
+  //   code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
+  //     if (!(group1 in keyCache)) {
+  //       keyCache[group1] = `FILE_${files.length + 1}`;
     
-        const file = tag.files[parseInt(group1) - 1];
-        if (!file) {
-          throw new Error('Invalid FILE_ Provided');
-        }
-        if (!file.buffer) {
-          return file.url;
-        }
+  //       const file = tag.files[parseInt(group1) - 1];
+  //       if (!file) {
+  //         throw new Error('Invalid FILE_ Provided');
+  //       }
+  //       if (!file.buffer) {
+  //         return file.url;
+  //       }
   
-        files.push({filename: file.filename, value: file.buffer});
-        if (!group2) {
-          // kill it from tag.files
-          file.deleted = true;
-        }
-      }
-      return keyCache[group1];
-    });
+  //       files.push({filename: file.filename, value: file.buffer});
+  //       if (!group2) {
+  //         // kill it from tag.files
+  //         file.deleted = true;
+  //       }
+  //     }
+  //     return keyCache[group1];
+  //   });
 
-    for (let i = 0; i < tag.files.length; i++) {
-      if (tag.files[i].deleted) {
-        tag.files.splice(i, 1);
-      }
-    }
+  //   for (let i = 0; i < tag.files.length; i++) {
+  //     if (tag.files[i].deleted) {
+  //       tag.files.splice(i, 1);
+  //     }
+  //   }
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    try {
-      const job = await utilitiesMediascript(context, {
-        code,
-        files,
-        maxFileSizeStrict: false,
-        mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-      }).then((x) => jobWaitForResult(context, x));
-      if (job.result.error) {
-        throw new Error(`**MediaScript Error**: ${job.result.error}`);
-      }
-      if (!job.result.response) {
-        throw new Error('MediaScript did not return a response (Should not happen, report this)');
-      }
+  //   try {
+  //     const job = await utilitiesMediascript(context, {
+  //       code,
+  //       files,
+  //       maxFileSizeStrict: false,
+  //       mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //     }).then((x) => jobWaitForResult(context, x));
+  //     if (job.result.error) {
+  //       throw new Error(`**MediaScript Error**: ${job.result.error}`);
+  //     }
+  //     if (!job.result.response) {
+  //       throw new Error('MediaScript did not return a response (Should not happen, report this)');
+  //     }
 
-      const response = job.result.response;
-      if (response.arguments) {
-        for (let key in response.arguments) {
-          await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
-        }
-      }
+  //     const response = job.result.response;
+  //     if (response.arguments) {
+  //       for (let key in response.arguments) {
+  //         await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
+  //       }
+  //     }
 
-      if (response.storage) {
-        tag.text += response.storage.urls.cdn;
-      } else {
-        const maxFileSize = context.maxAttachmentSize;
-        const filename = response.file.filename_safe;
+  //     if (response.storage) {
+  //       tag.text += response.storage.urls.cdn;
+  //     } else {
+  //       const maxFileSize = context.maxAttachmentSize;
+  //       const filename = response.file.filename_safe;
 
-        let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
-        if (response.file.metadata.mimetype.startsWith('text/')) {
-          data = data.toString();
-        }
+  //       let data: Buffer | string = (response.file.value) ? Buffer.from(response.file.value, 'base64') : Buffer.alloc(0);
+  //       if (response.file.metadata.mimetype.startsWith('text/')) {
+  //         data = data.toString();
+  //       }
 
-        if (maxFileSize < data.length) {
-          throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
-        }
+  //       if (maxFileSize < data.length) {
+  //         throw new Error(`Attachment surpassed max file size of ${maxFileSize} bytes`);
+  //       }
 
-        tag.variables[PrivateVariables.FILE_SIZE] += data.length;
+  //       tag.variables[PrivateVariables.FILE_SIZE] += data.length;
 
-        tag.files.push({
-          buffer: data,
-          filename,
-          spoiler: false,
-          url: '',
-        });
-      }
-    } catch(error) {
-      throw error;
-    }
+  //       tag.files.push({
+  //         buffer: data,
+  //         filename,
+  //         spoiler: false,
+  //         url: '',
+  //       });
+  //     }
+  //   } catch(error) {
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.MEDIASCRIPT_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // mediascripturl 1
-    // {mediascripturl:mediascript code here}
+  // [TagFunctions.MEDIASCRIPT_URL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // mediascripturl 1
+  //   // {mediascripturl:mediascript code here}
 
-    let code = arg.trim();
-    if (!code) {
-      return false;
-    }
+  //   let code = arg.trim();
+  //   if (!code) {
+  //     return false;
+  //   }
 
-    const files: Array<RequestFile> = [];
-    const keyCache: Record<string, string> = {};
-    code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
-      if (!(group1 in keyCache)) {
-        keyCache[group1] = `FILE_${files.length + 1}`;
+  //   const files: Array<RequestFile> = [];
+  //   const keyCache: Record<string, string> = {};
+  //   code = code.replace(URL_FILE_REPLACEMENT_REGEX, (match, group1, group2, offset) => {
+  //     if (!(group1 in keyCache)) {
+  //       keyCache[group1] = `FILE_${files.length + 1}`;
     
-        const file = tag.files[parseInt(group1) - 1];
-        if (!file) {
-          throw new Error('Invalid FILE_ Provided');
-        }
-        if (!file.buffer) {
-          return file.url;
-        }
+  //       const file = tag.files[parseInt(group1) - 1];
+  //       if (!file) {
+  //         throw new Error('Invalid FILE_ Provided');
+  //       }
+  //       if (!file.buffer) {
+  //         return file.url;
+  //       }
     
-        files.push({filename: file.filename, value: file.buffer});
-        if (!group2) {
-          // kill it from tag.files
-          file.deleted = true;
-        }
-      }
-      return keyCache[group1];
-    });
+  //       files.push({filename: file.filename, value: file.buffer});
+  //       if (!group2) {
+  //         // kill it from tag.files
+  //         file.deleted = true;
+  //       }
+  //     }
+  //     return keyCache[group1];
+  //   });
 
-    for (let i = 0; i < tag.files.length; i++) {
-      if (tag.files[i].deleted) {
-        tag.files.splice(i, 1);
-      }
-    }
+  //   for (let i = 0; i < tag.files.length; i++) {
+  //     if (tag.files[i].deleted) {
+  //       tag.files.splice(i, 1);
+  //     }
+  //   }
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    try {
-      const job = await utilitiesMediascript(context, {
-        code,
-        files,
-        maxFileSizeStrict: false,
-        mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
-        upload: true,
-      }).then((x) => jobWaitForResult(context, x));
-      if (job.result.error) {
-        throw new Error(`**MediaScript Error**: ${job.result.error}`);
-      }
-      if (!job.result.response) {
-        throw new Error('MediaScript did not return a response (Should not happen, report this)');
-      }
+  //   try {
+  //     const job = await utilitiesMediascript(context, {
+  //       code,
+  //       files,
+  //       maxFileSizeStrict: false,
+  //       mlDiffusionModel: tag.variables[PrivateVariables.SETTINGS][TagSettings.ML_IMAGINE_MODEL],
+  //       upload: true,
+  //     }).then((x) => jobWaitForResult(context, x));
+  //     if (job.result.error) {
+  //       throw new Error(`**MediaScript Error**: ${job.result.error}`);
+  //     }
+  //     if (!job.result.response) {
+  //       throw new Error('MediaScript did not return a response (Should not happen, report this)');
+  //     }
 
-      const response = job.result.response;
-      if (response.storage) {
-        tag.text += response.storage.urls.cdn;
-      }
+  //     const response = job.result.response;
+  //     if (response.storage) {
+  //       tag.text += response.storage.urls.cdn;
+  //     }
 
-      if (response.arguments) {
-        for (let key in response.arguments) {
-          await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
-        }
-      }
+  //     if (response.arguments) {
+  //       for (let key in response.arguments) {
+  //         await ScriptTags[TagFunctions.LOGICAL_SET](context, [key, response.arguments[key]].join(TagSymbols.SPLITTER_ARGUMENT), tag);
+  //       }
+  //     }
 
-    } catch(error) {
-      throw error;
-    }
+  //   } catch(error) {
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.NSFW]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // errors the command if the channel/user isnt suppose to use nsfw
-    // {nsfw}
+  // [TagFunctions.NSFW]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // errors the command if the channel/user isnt suppose to use nsfw
+  //   // {nsfw}
 
-    if (DefaultParameters.safe(context)) {
-      throw new Error('Cannot use a NSFW tag here!');
-    }
+  //   if (DefaultParameters.safe(context)) {
+  //     throw new Error('Cannot use a NSFW tag here!');
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.NSFW_FILTER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // returns an empty string if the content is deemed NSFW, will cut to 2000 characters
-    // {nsfwfilter:text}
+  // [TagFunctions.NSFW_FILTER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // returns an empty string if the content is deemed NSFW, will cut to 2000 characters
+  //   // {nsfwfilter:text}
 
-    increaseNetworkRequests(tag);
-    increaseNetworkRequestsOpenAI(tag);
+  //   increaseNetworkRequests(tag);
+  //   increaseNetworkRequestsOpenAI(tag);
 
-    if (arg) {
-      const [ isAwfulNSFW ] = await checkNSFW(context, arg.slice(0, 2000));
-      if (!isAwfulNSFW) {
-        tag.text += arg.slice(0, 2000);
-      }
-    }
+  //   if (arg) {
+  //     const [ isAwfulNSFW ] = await checkNSFW(context, arg.slice(0, 2000));
+  //     if (!isAwfulNSFW) {
+  //       tag.text += arg.slice(0, 2000);
+  //     }
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.PAGE_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {pagejson:{"embed": {"title": "asd"}}}
-    // {pagejson:[{"embed": {"title": "asd"}}]}
+  // [TagFunctions.PAGE_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {pagejson:{"embed": {"title": "asd"}}}
+  //   // {pagejson:[{"embed": {"title": "asd"}}]}
 
-    const pages: Array<any> = [];
-    try {
-      let data = JSON.parse(arg);
-      if (Array.isArray(data)) {
-        for (let child of data) {
-          pages.push(child);
-        }
-      } else {
-        pages.push(data);
-      }
-    } catch(error) {
-      throw new Error('Invalid Page Given');
-    }
+  //   const pages: Array<any> = [];
+  //   try {
+  //     let data = JSON.parse(arg);
+  //     if (Array.isArray(data)) {
+  //       for (let child of data) {
+  //         pages.push(child);
+  //       }
+  //     } else {
+  //       pages.push(data);
+  //     }
+  //   } catch(error) {
+  //     throw new Error('Invalid Page Given');
+  //   }
 
-    for (let page of pages) {
-      let content: string | undefined;
-      let embeds: Array<Embed> | undefined;
-      let filenames: Array<string> | undefined;
-      if (typeof(page) !== 'object') {
-        throw new Error('Invalid Page Given');
-      }
-      if ('content' in page && typeof(page.content) === 'string') {
-        content = page.content;
-      }
-      if ('embed' in page && typeof(page.embed) === 'object') {
-        try {
-          const embed = new Embed(page.embed);
-          if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
-            throw new Error('this error doesn\'t matter');
-          }
-          embeds = [embed];
-        } catch(error) {
-          throw new Error('Invalid Page Given');
-        }
-      }
-      if ('files' in page && Array.isArray(page.files)) {
-        for (let filename of page.files) {
-          if (filename && typeof(filename) === 'string' && filename.startsWith('attachment://')) {
-            if (!filenames) {
-              filenames = [];
-            }
-            filenames.push(filename);
-          }
-        }
-      }
+  //   for (let page of pages) {
+  //     let content: string | undefined;
+  //     let embeds: Array<Embed> | undefined;
+  //     let filenames: Array<string> | undefined;
+  //     if (typeof(page) !== 'object') {
+  //       throw new Error('Invalid Page Given');
+  //     }
+  //     if ('content' in page && typeof(page.content) === 'string') {
+  //       content = page.content;
+  //     }
+  //     if ('embed' in page && typeof(page.embed) === 'object') {
+  //       try {
+  //         const embed = new Embed(page.embed);
+  //         if (!embed.size && (!embed.image || !embed.image.url) && (!embed.thumbnail || !embed.thumbnail.url) && (!embed.video || !embed.video.url)) {
+  //           throw new Error('this error doesn\'t matter');
+  //         }
+  //         embeds = [embed];
+  //       } catch(error) {
+  //         throw new Error('Invalid Page Given');
+  //       }
+  //     }
+  //     if ('files' in page && Array.isArray(page.files)) {
+  //       for (let filename of page.files) {
+  //         if (filename && typeof(filename) === 'string' && filename.startsWith('attachment://')) {
+  //           if (!filenames) {
+  //             filenames = [];
+  //           }
+  //           filenames.push(filename);
+  //         }
+  //       }
+  //     }
 
-      if (!content && !embeds && !filenames) {
-        throw new Error('Invalid Page Given');
-      }
+  //     if (!content && !embeds && !filenames) {
+  //       throw new Error('Invalid Page Given');
+  //     }
 
-      tag.pages.push({content, embeds, filenames});
+  //     tag.pages.push({content, embeds, filenames});
 
-      if (tag.limits.MAX_PAGES < tag.pages.length) {
-        throw new Error(`Pages surpassed max pages length of ${tag.limits.MAX_PAGES}`);
-      }
-    }
+  //     if (tag.limits.MAX_PAGES < tag.pages.length) {
+  //       throw new Error(`Pages surpassed max pages length of ${tag.limits.MAX_PAGES}`);
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.PREFIX]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // the prefix used
-    // {prefix}
+  // [TagFunctions.PREFIX]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // the prefix used
+  //   // {prefix}
 
-    if (context instanceof Interaction.InteractionContext) {
-      tag.text += '/';
-    } else {
-      tag.text += context.prefix;
-    }
+  //   if (context instanceof Interaction.InteractionContext) {
+  //     tag.text += '/';
+  //   } else {
+  //     tag.text += context.prefix;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.REPLY_CONTENT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {replycontent}
+  // [TagFunctions.REPLY_CONTENT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {replycontent}
 
-    if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
-      const { content } = context.message.referencedMessage;
-      tag.text += content;
-    }
+  //   if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
+  //     const { content } = context.message.referencedMessage;
+  //     tag.text += content;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.REPLY_USER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {replyuserid}
+  // [TagFunctions.REPLY_USER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {replyuserid}
 
-    if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
-      const { author } = context.message.referencedMessage;
-      tag.text += author.id;
-    }
+  //   if (context instanceof Command.Context && context.message && context.message.referencedMessage) {
+  //     const { author } = context.message.referencedMessage;
+  //     tag.text += author.id;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.REQUEST]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {request:{headers, method, url}} jsonify body
+  // [TagFunctions.REQUEST]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {request:{headers, method, url}} jsonify body
 
-    const options: RestOptions.UtilitiesProxyRequest = {method: '', url: ''};
-    try {
-      let object = JSON.parse(arg);
-      if (typeof(object) !== 'object') {
-        throw new TagRequestError('Request options are invalid.');
-      }
+  //   const options: RestOptions.UtilitiesProxyRequest = {method: '', url: ''};
+  //   try {
+  //     let object = JSON.parse(arg);
+  //     if (typeof(object) !== 'object') {
+  //       throw new TagRequestError('Request options are invalid.');
+  //     }
 
-      if (!('method' in object) || typeof(object.method) !== 'string') {
-        throw new TagRequestError('Request method is invalid.');
-      }
+  //     if (!('method' in object) || typeof(object.method) !== 'string') {
+  //       throw new TagRequestError('Request method is invalid.');
+  //     }
 
-      options.method = object.method.trim().toUpperCase();
-      if (!options.method || !(options.method in ProxyRequestMethods)) {
-        throw new TagRequestError('Request method is invalid.');
-      }
+  //     options.method = object.method.trim().toUpperCase();
+  //     if (!options.method || !(options.method in ProxyRequestMethods)) {
+  //       throw new TagRequestError('Request method is invalid.');
+  //     }
 
-      if (!('url' in object) || typeof(object.url) !== 'string') {
-        throw new TagRequestError('Request url is invalid.');
-      }
+  //     if (!('url' in object) || typeof(object.url) !== 'string') {
+  //       throw new TagRequestError('Request url is invalid.');
+  //     }
 
-      options.url = await Parameters.url(object.url.trim(), context);
-      if (!options.url) {
-        throw new TagRequestError('Request url is invalid.');
-      }
+  //     options.url = await Parameters.url(object.url.trim(), context);
+  //     if (!options.url) {
+  //       throw new TagRequestError('Request url is invalid.');
+  //     }
 
-      switch (options.method) {
-        case ProxyRequestMethods.PATCH:
-        case ProxyRequestMethods.POST:
-        case ProxyRequestMethods.PUT: {
-          // support multipart in 'data'
-          // support {files: {key: filename}}
-          if ('json' in object) {
-            if (typeof(object.json) !== 'object') {
-              throw new TagRequestError('Request json is invalid. (allowed: Object, Array)');
-            }
-            options.dataJSON = object.json;
-          }
-        }; break;
-      }
+  //     switch (options.method) {
+  //       case ProxyRequestMethods.PATCH:
+  //       case ProxyRequestMethods.POST:
+  //       case ProxyRequestMethods.PUT: {
+  //         // support multipart in 'data'
+  //         // support {files: {key: filename}}
+  //         if ('json' in object) {
+  //           if (typeof(object.json) !== 'object') {
+  //             throw new TagRequestError('Request json is invalid. (allowed: Object, Array)');
+  //           }
+  //           options.dataJSON = object.json;
+  //         }
+  //       }; break;
+  //     }
 
-      if ('headers' in object) {
-        if (typeof(object.headers) !== 'object' || Array.isArray(object.headers)) {
-          throw new TagRequestError('Request headers are invalid. (allowed: Record<string, string>)');
-        }
-        options.headers = object.headers;
-      }
+  //     if ('headers' in object) {
+  //       if (typeof(object.headers) !== 'object' || Array.isArray(object.headers)) {
+  //         throw new TagRequestError('Request headers are invalid. (allowed: Record<string, string>)');
+  //       }
+  //       options.headers = object.headers;
+  //     }
 
-      if ('query' in object) {
-        if (typeof(object.query) !== 'object' || Array.isArray(object.query)) {
-          throw new TagRequestError('Request query is invalid. (allowed: Record<string, string>)');
-        }
-        options.query = object.query;
-      }
+  //     if ('query' in object) {
+  //       if (typeof(object.query) !== 'object' || Array.isArray(object.query)) {
+  //         throw new TagRequestError('Request query is invalid. (allowed: Record<string, string>)');
+  //       }
+  //       options.query = object.query;
+  //     }
 
-    } catch(error) {
-      if (error instanceof TagRequestError) {
-        throw error;
-      }
-      throw new Error('Request options failed to parse.');
-    }
+  //   } catch(error) {
+  //     if (error instanceof TagRequestError) {
+  //       throw error;
+  //     }
+  //     throw new Error('Request options failed to parse.');
+  //   }
 
-    try {
-      const response = await utilitiesProxyRequest(context, options);
-      tag.text += JSON.stringify(response);
-    } catch(error) {
-      if (error.response) {
-        try {
-          const information = await error.response.json() as any;
-          if ('errors' in information) {
-            const description: Array<string> = [];
-            for (let key in information.errors) {
-              const value = information.errors[key];
-              let message: string;
-              if (typeof(value) === 'object') {
-                message = JSON.stringify(value);
-              } else {
-                message = String(value);
-              }
-              description.push(`**${key}**: ${message}`);
-            }
-            if (description.length) {
-              throw new Error(`Requested Failed: ${description.join('\n')}`);
-            }
-          }
-          if ('message' in information) {
-            throw new Error(information.message);
-          }
-        } catch(error) {
+  //   try {
+  //     const response = await utilitiesProxyRequest(context, options);
+  //     tag.text += JSON.stringify(response);
+  //   } catch(error) {
+  //     if (error.response) {
+  //       try {
+  //         const information = await error.response.json() as any;
+  //         if ('errors' in information) {
+  //           const description: Array<string> = [];
+  //           for (let key in information.errors) {
+  //             const value = information.errors[key];
+  //             let message: string;
+  //             if (typeof(value) === 'object') {
+  //               message = JSON.stringify(value);
+  //             } else {
+  //               message = String(value);
+  //             }
+  //             description.push(`**${key}**: ${message}`);
+  //           }
+  //           if (description.length) {
+  //             throw new Error(`Requested Failed: ${description.join('\n')}`);
+  //           }
+  //         }
+  //         if ('message' in information) {
+  //           throw new Error(information.message);
+  //         }
+  //       } catch(error) {
           
-        }
-      }
-      throw new Error('Request Failed');
-    }
+  //       }
+  //     }
+  //     throw new Error('Request Failed');
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.RNG_CHOOSE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {choose:50|100}
@@ -3799,153 +3802,154 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
 
     return true;
   },
+  // Still we don't have tokens for that
+  // may use local APIs?
+  // [TagFunctions.SEARCH_DUCKDUCKGO_IMAGES]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {search.duckduckgo.images:cat}
+  //   // {search.duckduckgo.images:1|cat}
 
-  [TagFunctions.SEARCH_DUCKDUCKGO_IMAGES]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {search.duckduckgo.images:cat}
-    // {search.duckduckgo.images:1|cat}
+  //   if (!arg) {
+  //     return true;
+  //   }
 
-    if (!arg) {
-      return true;
-    }
+  //   let page = -1;
+  //   if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     const firstSplitter = arg.indexOf(TagSymbols.SPLITTER_ARGUMENT);
+  //     const firstValue = arg.slice(0, firstSplitter).trim().toLowerCase() || '0';
+  //     if (firstValue === 'random' || !isNaN(firstValue as any)) {
+  //       if (firstValue === 'random') {
+  //         page = -1;
+  //       } else if (!isNaN(firstValue as any)) {
+  //         page = parseInt(firstValue);
+  //         if (isNaN(page)) {
+  //           page = 0;
+  //         }
+  //       }
+  //       arg = arg.slice(firstSplitter + 1);
+  //     }
+  //   }
 
-    let page = -1;
-    if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      const firstSplitter = arg.indexOf(TagSymbols.SPLITTER_ARGUMENT);
-      const firstValue = arg.slice(0, firstSplitter).trim().toLowerCase() || '0';
-      if (firstValue === 'random' || !isNaN(firstValue as any)) {
-        if (firstValue === 'random') {
-          page = -1;
-        } else if (!isNaN(firstValue as any)) {
-          page = parseInt(firstValue);
-          if (isNaN(page)) {
-            page = 0;
-          }
-        }
-        arg = arg.slice(firstSplitter + 1);
-      }
-    }
+  //   const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.API_SEARCH_DUCKDUCKGO_IMAGES] = (
+  //     tag.variables[PrivateVariables.RESULTS][TagFunctions.API_SEARCH_DUCKDUCKGO_IMAGES] ||
+  //     {}
+  //   );
 
-    const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.API_SEARCH_DUCKDUCKGO_IMAGES] = (
-      tag.variables[PrivateVariables.RESULTS][TagFunctions.API_SEARCH_DUCKDUCKGO_IMAGES] ||
-      {}
-    );
+  //   arg = arg.slice(0, 1024);
+  //   if (!(arg in cachedResults)) {
+  //     increaseNetworkRequests(tag);
+  //   }
 
-    arg = arg.slice(0, 1024);
-    if (!(arg in cachedResults)) {
-      increaseNetworkRequests(tag);
-    }
+  //   const response = cachedResults[arg] || await searchDuckDuckGoImages(context, {
+  //     query: arg,
+  //     safe: DefaultParameters.safe(context),
+  //   });
+  //   if (!(arg in cachedResults)) {
+  //     cachedResults[arg] = response;
+  //   }
 
-    const response = cachedResults[arg] || await searchDuckDuckGoImages(context, {
-      query: arg,
-      safe: DefaultParameters.safe(context),
-    });
-    if (!(arg in cachedResults)) {
-      cachedResults[arg] = response;
-    }
+  //   const { results } = response;
+  //   page = Math.min(page, results.length);
+  //   if (page === -1) {
+  //     page = Math.floor(Math.random() * results.length);
+  //   }
+  //   page = Math.max(page, 0);
 
-    const { results } = response;
-    page = Math.min(page, results.length);
-    if (page === -1) {
-      page = Math.floor(Math.random() * results.length);
-    }
-    page = Math.max(page, 0);
-
-    const result = results[page];
-    if (result) {
-      tag.text += result.image;
-    }
+  //   const result = results[page];
+  //   if (result) {
+  //     tag.text += result.image;
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.SEARCH_GOOGLE_IMAGES]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {search.google.images:cat}
-    // {search.google.images:1|cat}
+  // [TagFunctions.SEARCH_GOOGLE_IMAGES]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {search.google.images:cat}
+  //   // {search.google.images:1|cat}
 
-    if (!arg) {
-      return true;
-    }
+  //   if (!arg) {
+  //     return true;
+  //   }
 
-    let page = -1;
-    if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
-      const firstSplitter = arg.indexOf(TagSymbols.SPLITTER_ARGUMENT);
-      const firstValue = arg.slice(0, firstSplitter).trim().toLowerCase() || '0';
-      if (firstValue === 'random' || !isNaN(firstValue as any)) {
-        if (firstValue === 'random') {
-          page = -1;
-        } else if (!isNaN(firstValue as any)) {
-          page = parseInt(firstValue);
-          if (isNaN(page)) {
-            page = 0;
-          }
-        }
-        arg = arg.slice(firstSplitter + 1);
-      }
-    }
+  //   let page = -1;
+  //   if (arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
+  //     const firstSplitter = arg.indexOf(TagSymbols.SPLITTER_ARGUMENT);
+  //     const firstValue = arg.slice(0, firstSplitter).trim().toLowerCase() || '0';
+  //     if (firstValue === 'random' || !isNaN(firstValue as any)) {
+  //       if (firstValue === 'random') {
+  //         page = -1;
+  //       } else if (!isNaN(firstValue as any)) {
+  //         page = parseInt(firstValue);
+  //         if (isNaN(page)) {
+  //           page = 0;
+  //         }
+  //       }
+  //       arg = arg.slice(firstSplitter + 1);
+  //     }
+  //   }
 
-    const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_GOOGLE_IMAGES] = (
-      tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_GOOGLE_IMAGES] ||
-      {}
-    );
+  //   const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_GOOGLE_IMAGES] = (
+  //     tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_GOOGLE_IMAGES] ||
+  //     {}
+  //   );
 
-    arg = arg.slice(0, 1024);
-    if (!(arg in cachedResults)) {
-      increaseNetworkRequests(tag);
-    }
+  //   arg = arg.slice(0, 1024);
+  //   if (!(arg in cachedResults)) {
+  //     increaseNetworkRequests(tag);
+  //   }
 
-    const results = cachedResults[arg] || await searchGoogleImages(context, {
-      query: arg,
-      safe: DefaultParameters.safe(context),
-    });
-    if (!(arg in cachedResults)) {
-      cachedResults[arg] = results;
-    }
+  //   const results = cachedResults[arg] || await searchGoogleImages(context, {
+  //     query: arg,
+  //     safe: DefaultParameters.safe(context),
+  //   });
+  //   if (!(arg in cachedResults)) {
+  //     cachedResults[arg] = results;
+  //   }
 
-    page = Math.min(page, results.length);
-    if (page === -1) {
-      page = Math.floor(Math.random() * results.length);
-    }
-    page = Math.max(page, 0);
+  //   page = Math.min(page, results.length);
+  //   if (page === -1) {
+  //     page = Math.floor(Math.random() * results.length);
+  //   }
+  //   page = Math.max(page, 0);
 
-    const result = results[page];
-    if (result) {
-      tag.text += result.imageUrl;
-    }
+  //   const result = results[page];
+  //   if (result) {
+  //     tag.text += result.imageUrl;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.SEARCH_YOUTUBE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {search.youtube:cat}
+  // [TagFunctions.SEARCH_YOUTUBE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {search.youtube:cat}
 
-    if (!arg) {
-      return true;
-    }
+  //   if (!arg) {
+  //     return true;
+  //   }
 
-    const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_YOUTUBE] = (
-      tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_YOUTUBE] ||
-      {}
-    );
+  //   const cachedResults = tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_YOUTUBE] = (
+  //     tag.variables[PrivateVariables.RESULTS][TagFunctions.SEARCH_YOUTUBE] ||
+  //     {}
+  //   );
 
-    arg = arg.slice(0, 1024);
-    if (!(arg in cachedResults)) {
-      increaseNetworkRequests(tag);
-    }
+  //   arg = arg.slice(0, 1024);
+  //   if (!(arg in cachedResults)) {
+  //     increaseNetworkRequests(tag);
+  //   }
 
-    const response = cachedResults[arg] || await searchYoutube(context, {
-      query: arg,
-    });
-    if (!(arg in cachedResults)) {
-      cachedResults[arg] = response;
-    }
+  //   const response = cachedResults[arg] || await searchYoutube(context, {
+  //     query: arg,
+  //   });
+  //   if (!(arg in cachedResults)) {
+  //     cachedResults[arg] = response;
+  //   }
 
-    const result = response.results.find((x) => x.type === YoutubeResultTypes.VIDEO);
-    if (result) {
-      tag.text += result.url;
-    }
+  //   const result = response.results.find((x) => x.type === YoutubeResultTypes.VIDEO);
+  //   if (result) {
+  //     tag.text += result.url;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.SETTINGS]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {settings:SETTING|VALUE}
@@ -4137,7 +4141,7 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     tag.text += arg.toLowerCase();
     return true;
   },
-
+  // TODO: a wrapper for Markup features lol
   [TagFunctions.STRING_MARKUP_BOLD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {markupbold:text}
 
@@ -4417,48 +4421,48 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
 
     return true;
   },
+  // no google translate API yet duh
+  // [TagFunctions.STRING_TRANSLATE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // translate some text
+  //   // {translate:TEXT|LANGUAGE?}
+  //   // {translate:cake}
+  //   // {translate:cake|russian}
 
-  [TagFunctions.STRING_TRANSLATE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // translate some text
-    // {translate:TEXT|LANGUAGE?}
-    // {translate:cake}
-    // {translate:cake|russian}
+  //   increaseNetworkRequests(tag);
 
-    increaseNetworkRequests(tag);
+  //   if (arg.length) {
+  //     const parts = split(arg);
 
-    if (arg.length) {
-      const parts = split(arg);
+  //     let text: string;
 
-      let text: string;
+  //     let language: GoogleLocales;
+  //     if (2 <= parts.length) {
+  //       const suspectedLanguage = parts.pop()!;
+  //       try {
+  //         language = await Parameters.locale(suspectedLanguage, context);
+  //       } catch(error) {
+  //         parts.push(suspectedLanguage);
+  //         language = await Parameters.locale('', context);
+  //       }
 
-      let language: GoogleLocales;
-      if (2 <= parts.length) {
-        const suspectedLanguage = parts.pop()!;
-        try {
-          language = await Parameters.locale(suspectedLanguage, context);
-        } catch(error) {
-          parts.push(suspectedLanguage);
-          language = await Parameters.locale('', context);
-        }
+  //       text = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
+  //     } else {
+  //       language = await Parameters.locale('', context);
+  //       text = parts[0]!;
+  //     }
 
-        text = parts.join(TagSymbols.SPLITTER_ARGUMENT).trim();
-      } else {
-        language = await Parameters.locale('', context);
-        text = parts[0]!;
-      }
+  //     if (text) {
+  //       try {
+  //         const { translated_text: translatedText } = await googleTranslate(context, {text, to: language});
+  //         tag.text += translatedText.trim();
+  //       } catch(error) {
 
-      if (text) {
-        try {
-          const { translated_text: translatedText } = await googleTranslate(context, {text, to: language});
-          tag.text += translatedText.trim();
-        } catch(error) {
+  //       }
+  //     }
+  //   }
 
-        }
-      }
-    }
-
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.STRING_UPPER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {upper:text}
@@ -4473,182 +4477,182 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     tag.text += encodeURIComponent(arg);
     return true;
   },
+  // STill not done the Tag Handler!!
+  // [TagFunctions.TAG]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {tag:tag_id|arguments}
 
-  [TagFunctions.TAG]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {tag:tag_id|arguments}
+  //   let [ tagId, tagArguments ] = split(arg, 2);
+  //   tagId = tagId.trim();
+  //   tagArguments = tagArguments || '';
+  //   if (!tagId || !isSnowflake(tagId)) {
+  //     throw new Error('Invalid Tag Id');
+  //   }
 
-    let [ tagId, tagArguments ] = split(arg, 2);
-    tagId = tagId.trim();
-    tagArguments = tagArguments || '';
-    if (!tagId || !isSnowflake(tagId)) {
-      throw new Error('Invalid Tag Id');
-    }
+  //   // ignore tag executions in code and componentjson
+  //   if (tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING]) {
+  //     return false;
+  //   }
 
-    // ignore tag executions in code and componentjson
-    if (tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING]) {
-      return false;
-    }
+  //   increaseTagExecutions(tag);
+  //   increaseNetworkRequests(tag);
 
-    increaseTagExecutions(tag);
-    increaseNetworkRequests(tag);
+  //   try {
+  //     const fetchedTag = await fetchTagId(context, tagId);
 
-    try {
-      const fetchedTag = await fetchTagId(context, tagId);
+  //     let isAllowed = fetchedTag.is_on_directory || (fetchedTag.server_id === (context.guildId || context.channelId));
+  //     if (!isAllowed && (context.metadata && context.metadata.tag)) {
+  //       // see if it's from the current tag owner's dms
+  //       const user = await UserStore.getOrFetch(context, context.metadata.tag.user.id);
+  //       if (user) {
+  //         isAllowed = (fetchedTag.server_id === user.channelId);
+  //       }
+  //     }
 
-      let isAllowed = fetchedTag.is_on_directory || (fetchedTag.server_id === (context.guildId || context.channelId));
-      if (!isAllowed && (context.metadata && context.metadata.tag)) {
-        // see if it's from the current tag owner's dms
-        const user = await UserStore.getOrFetch(context, context.metadata.tag.user.id);
-        if (user) {
-          isAllowed = (fetchedTag.server_id === user.channelId);
-        }
-      }
+  //     if (!isAllowed) {
+  //       throw new Error('Cannot call this tag');
+  //       return false;
+  //     }
 
-      if (!isAllowed) {
-        throw new Error('Cannot call this tag');
-        return false;
-      }
+  //     await increaseUsage(context, fetchedTag);
 
-      await increaseUsage(context, fetchedTag);
+  //     const oldTag = context.metadata && context.metadata.tag;
 
-      const oldTag = context.metadata && context.metadata.tag;
+  //     const oldVariables = Object.assign({}, tag.variables);
+  //     const variables = Object.create(null);
+  //     if (oldTag && oldTag.id === fetchedTag.id) {
+  //       Object.assign(variables, oldVariables);
+  //     } else {
+  //       for (let key in PrivateVariables) {
+  //         const storedKey = (PrivateVariables as any)[key];
+  //         variables[storedKey] = tag.variables[storedKey];
+  //       }
+  //     }
+  //     variables[PrivateVariables.ARGS_STRING] = tagArguments;
+  //     variables[PrivateVariables.ARGS] = Parameters.stringArguments(tagArguments);
 
-      const oldVariables = Object.assign({}, tag.variables);
-      const variables = Object.create(null);
-      if (oldTag && oldTag.id === fetchedTag.id) {
-        Object.assign(variables, oldVariables);
-      } else {
-        for (let key in PrivateVariables) {
-          const storedKey = (PrivateVariables as any)[key];
-          variables[storedKey] = tag.variables[storedKey];
-        }
-      }
-      variables[PrivateVariables.ARGS_STRING] = tagArguments;
-      variables[PrivateVariables.ARGS] = Parameters.stringArguments(tagArguments);
+  //     if (context.metadata && context.metadata.tag) {
+  //       variables[PrivateVariables.PARENT_TAG_ID] = context.metadata.tag.id;
+  //     }
 
-      if (context.metadata && context.metadata.tag) {
-        variables[PrivateVariables.PARENT_TAG_ID] = context.metadata.tag.id;
-      }
+  //     if (context.metadata) {
+  //       context.metadata.tag = fetchedTag;
+  //     }
 
-      if (context.metadata) {
-        context.metadata.tag = fetchedTag;
-      }
+  //     const tagContent = (fetchedTag.reference_tag) ? fetchedTag.reference_tag.content : fetchedTag.content;
+  //     const argParsed = await parse(context, tagContent, tagArguments, variables, tag.context, tag.limits);
+  //     normalizeTagResults(tag, argParsed);
 
-      const tagContent = (fetchedTag.reference_tag) ? fetchedTag.reference_tag.content : fetchedTag.content;
-      const argParsed = await parse(context, tagContent, tagArguments, variables, tag.context, tag.limits);
-      normalizeTagResults(tag, argParsed);
+  //     if (oldTag && oldTag.id === fetchedTag.id) {
+  //       Object.assign(tag.variables, argParsed.variables);
+  //     } else {
+  //       for (let key in PrivateVariables) {
+  //         const storedKey = (PrivateVariables as any)[key];
+  //         tag.variables[storedKey] = argParsed.variables[storedKey];
+  //       }
+  //     }
 
-      if (oldTag && oldTag.id === fetchedTag.id) {
-        Object.assign(tag.variables, argParsed.variables);
-      } else {
-        for (let key in PrivateVariables) {
-          const storedKey = (PrivateVariables as any)[key];
-          tag.variables[storedKey] = argParsed.variables[storedKey];
-        }
-      }
+  //     tag.variables[PrivateVariables.ARGS_STRING] = oldVariables[PrivateVariables.ARGS_STRING];
+  //     tag.variables[PrivateVariables.ARGS] = oldVariables[PrivateVariables.ARGS];
+  //     tag.variables[PrivateVariables.PARENT_TAG_ID] = oldVariables[PrivateVariables.PARENT_TAG_ID];
 
-      tag.variables[PrivateVariables.ARGS_STRING] = oldVariables[PrivateVariables.ARGS_STRING];
-      tag.variables[PrivateVariables.ARGS] = oldVariables[PrivateVariables.ARGS];
-      tag.variables[PrivateVariables.PARENT_TAG_ID] = oldVariables[PrivateVariables.PARENT_TAG_ID];
+  //     if (context.metadata) {
+  //       context.metadata.tag = oldTag;
+  //     }
+  //   } catch(error) {
+  //     throw error;
+  //     return false;
+  //   }
 
-      if (context.metadata) {
-        context.metadata.tag = oldTag;
-      }
-    } catch(error) {
-      throw error;
-      return false;
-    }
+  //   return true;
+  // },
 
-    return true;
-  },
-
-  [TagFunctions.TAG_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {tagid}
+  // [TagFunctions.TAG_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {tagid}
   
-    if (context.metadata && context.metadata.tag) {
-      tag.text += context.metadata.tag.id;
-    }
+  //   if (context.metadata && context.metadata.tag) {
+  //     tag.text += context.metadata.tag.id;
+  //   }
   
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.TAG_NAME]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {tagname}
+  // [TagFunctions.TAG_NAME]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {tagname}
 
-    if (context.metadata && context.metadata.tag) {
-      tag.text += context.metadata.tag.name;
-    }
+  //   if (context.metadata && context.metadata.tag) {
+  //     tag.text += context.metadata.tag.name;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.TAG_OWNER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {tagownerid}
+  // [TagFunctions.TAG_OWNER_ID]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {tagownerid}
 
-    if (context.metadata && context.metadata.tag) {
-      tag.text += context.metadata.tag.user.id;
-    }
+  //   if (context.metadata && context.metadata.tag) {
+  //     tag.text += context.metadata.tag.user.id;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
+  // maybe the next build?
+  // [TagFunctions.TEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {text:https://google.com}
 
-  [TagFunctions.TEXT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {text:https://google.com}
+  //   const url = await Parameters.url(arg.trim(), context);
+  //   increaseNetworkRequests(tag);
 
-    const url = await Parameters.url(arg.trim(), context);
-    increaseNetworkRequests(tag);
+  //   try {
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     const response = await utilitiesFetchText(context, {maxFileSize, url});
 
-    try {
-      const maxFileSize = context.maxAttachmentSize;
-      const response = await utilitiesFetchText(context, {maxFileSize, url});
+  //     const text = await response.text();
+  //     if (maxFileSize < text.length + tag.text.length) {
+  //       throw new Error(`Text exceeded ${maxFileSize} bytes`);
+  //     }
+  //     tag.text += text
 
-      const text = await response.text();
-      if (maxFileSize < text.length + tag.text.length) {
-        throw new Error(`Text exceeded ${maxFileSize} bytes`);
-      }
-      tag.text += text
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //   return true;
+  // },
 
-    return true;
-  },
+  // [TagFunctions.TEXT_FROM_HTML]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {textfromhtml:https://google.com}
 
-  [TagFunctions.TEXT_FROM_HTML]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {textfromhtml:https://google.com}
+  //   const url = await Parameters.url(arg.trim(), context);
+  //   increaseNetworkRequests(tag);
 
-    const url = await Parameters.url(arg.trim(), context);
-    increaseNetworkRequests(tag);
+  //   try {
+  //     const maxFileSize = context.maxAttachmentSize;
+  //     const response = await utilitiesFetchText(context, {maxFileSize, url});
 
-    try {
-      const maxFileSize = context.maxAttachmentSize;
-      const response = await utilitiesFetchText(context, {maxFileSize, url});
+  //     const text = await response.text();
+  //     if (maxFileSize < text.length + tag.text.length) {
+  //       throw new Error(`Text exceeded ${maxFileSize} bytes`);
+  //     }
 
-      const text = await response.text();
-      if (maxFileSize < text.length + tag.text.length) {
-        throw new Error(`Text exceeded ${maxFileSize} bytes`);
-      }
-
-      try {
-        const $ = cheerio.load(text);
-        $('script, style, noscript, iframe, embed, object').remove();
-        $('*').contents().filter(function() {
-            return this.type === 'comment';
-        }).remove();
+  //     try {
+  //       const $ = cheerio.load(text);
+  //       $('script, style, noscript, iframe, embed, object').remove();
+  //       $('*').contents().filter(function() {
+  //           return this.type === 'comment';
+  //       }).remove();
   
-        tag.text += $.text().replace(/\s+/g, ' ').trim();
-      } catch(error) {
-        tag.text += text;
-      }
-    } catch(error) {
-      console.log(error);
-      throw error;
-    }
+  //       tag.text += $.text().replace(/\s+/g, ' ').trim();
+  //     } catch(error) {
+  //       tag.text += text;
+  //     }
+  //   } catch(error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.TIME_UNIX]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {unix}
@@ -4696,38 +4700,38 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.TRANSCRIBE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // transcribe an audio/video clip
-    // {transcribe:URL?}
+  // [TagFunctions.TRANSCRIBE]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // transcribe an audio/video clip
+  //   // {transcribe:URL?}
 
-    increaseNetworkRequests(tag);
+  //   increaseNetworkRequests(tag);
 
-    let url = await lastAudioOrVideoUrl(arg.trim(), context);
-    if (!url) {
-      const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_AV_FALLBACK];
-      if (fallbackFunction && fallbackFunction in ScriptTags) {
-        const textCache = tag.text;
+  //   let url = await lastAudioOrVideoUrl(arg.trim(), context);
+  //   if (!url) {
+  //     const fallbackFunction = tag.variables[PrivateVariables.SETTINGS][TagSettings.MEDIA_AV_FALLBACK];
+  //     if (fallbackFunction && fallbackFunction in ScriptTags) {
+  //       const textCache = tag.text;
 
-        tag.text = '';
-        await ScriptTags[fallbackFunction](context, arg, tag);
-        url = tag.text;
-        tag.text = textCache;
-      }
-    }
+  //       tag.text = '';
+  //       await ScriptTags[fallbackFunction](context, arg, tag);
+  //       url = tag.text;
+  //       tag.text = textCache;
+  //     }
+  //   }
 
-    if (url) {
-      try {
-        const { duration, languages, text } = await mediaAVToolsTranscribe(context, {url});
-        if (text) {
-          tag.text += text;
-        }
-      } catch(error) {
+  //   if (url) {
+  //     try {
+  //       const { duration, languages, text } = await mediaAVToolsTranscribe(context, {url});
+  //       if (text) {
+  //         tag.text += text;
+  //       }
+  //     } catch(error) {
 
-      }
-    }
+  //     }
+  //   }
 
-    return true;
-  },
+  //   return true;
+  // },
 
   [TagFunctions.TRAVERSE_JSON]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {traversejson:string|json}
@@ -5046,183 +5050,183 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     return true;
   },
 
-  [TagFunctions.VARIABLES_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {variableschannel}
+  // [TagFunctions.VARIABLES_CHANNEL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {variableschannel}
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    const storage: {
-      channel: Record<string, string>,
-      global: Record<string, string>,
-      server: Record<string, string>,
-      user: Record<string, string>,
-    } = {channel: {}, global: {}, server: {}, user: {}};
+  //   const storage: {
+  //     channel: Record<string, string>,
+  //     global: Record<string, string>,
+  //     server: Record<string, string>,
+  //     user: Record<string, string>,
+  //   } = {channel: {}, global: {}, server: {}, user: {}};
 
-    if (tagId) {
-      const response = await fetchTagVariables(context, tagId, {
-        channelId: context.channelId!,
-        guildId: context.guildId,
-        userId: context.userId,
-      });
-      for (let key in Object.keys(response)) {
-        const storageType = parseInt(key) as TagVariableStorageTypes;
-        switch (storageType) {
-          case TagVariableStorageTypes.CHANNEL: {
-            Object.assign(storage.channel, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GUILD: {
-            Object.assign(storage.server, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.USER: {
-            Object.assign(storage.user, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GLOBAL: {
-            Object.assign(storage.global, response[storageType]);
-          }; break;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     const response = await fetchTagVariables(context, tagId, {
+  //       channelId: context.channelId!,
+  //       guildId: context.guildId,
+  //       userId: context.userId,
+  //     });
+  //     for (let key in Object.keys(response)) {
+  //       const storageType = parseInt(key) as TagVariableStorageTypes;
+  //       switch (storageType) {
+  //         case TagVariableStorageTypes.CHANNEL: {
+  //           Object.assign(storage.channel, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GUILD: {
+  //           Object.assign(storage.server, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.USER: {
+  //           Object.assign(storage.user, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GLOBAL: {
+  //           Object.assign(storage.global, response[storageType]);
+  //         }; break;
+  //       }
+  //     }
+  //   }
 
-    tag.text += JSON.stringify(storage.channel);
+  //   tag.text += JSON.stringify(storage.channel);
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.VARIABLES_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {variablesglobal}
+  // [TagFunctions.VARIABLES_GLOBAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {variablesglobal}
   
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    const storage: {
-      channel: Record<string, string>,
-      global: Record<string, string>,
-      server: Record<string, string>,
-      user: Record<string, string>,
-    } = {channel: {}, global: {}, server: {}, user: {}};
+  //   const storage: {
+  //     channel: Record<string, string>,
+  //     global: Record<string, string>,
+  //     server: Record<string, string>,
+  //     user: Record<string, string>,
+  //   } = {channel: {}, global: {}, server: {}, user: {}};
 
-    if (tagId) {
-      const response = await fetchTagVariables(context, tagId, {
-        channelId: context.channelId!,
-        guildId: context.guildId,
-        userId: context.userId,
-      });
-      for (let key in Object.keys(response)) {
-        const storageType = parseInt(key) as TagVariableStorageTypes;
-        switch (storageType) {
-          case TagVariableStorageTypes.CHANNEL: {
-            Object.assign(storage.channel, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GUILD: {
-            Object.assign(storage.server, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.USER: {
-            Object.assign(storage.user, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GLOBAL: {
-            Object.assign(storage.global, response[storageType]);
-          }; break;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     const response = await fetchTagVariables(context, tagId, {
+  //       channelId: context.channelId!,
+  //       guildId: context.guildId,
+  //       userId: context.userId,
+  //     });
+  //     for (let key in Object.keys(response)) {
+  //       const storageType = parseInt(key) as TagVariableStorageTypes;
+  //       switch (storageType) {
+  //         case TagVariableStorageTypes.CHANNEL: {
+  //           Object.assign(storage.channel, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GUILD: {
+  //           Object.assign(storage.server, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.USER: {
+  //           Object.assign(storage.user, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GLOBAL: {
+  //           Object.assign(storage.global, response[storageType]);
+  //         }; break;
+  //       }
+  //     }
+  //   }
 
-    tag.text += JSON.stringify(storage.global);
+  //   tag.text += JSON.stringify(storage.global);
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.VARIABLES_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {variablesserver}
+  // [TagFunctions.VARIABLES_SERVER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {variablesserver}
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    const storage: {
-      channel: Record<string, string>,
-      global: Record<string, string>,
-      server: Record<string, string>,
-      user: Record<string, string>,
-    } = {channel: {}, global: {}, server: {}, user: {}};
+  //   const storage: {
+  //     channel: Record<string, string>,
+  //     global: Record<string, string>,
+  //     server: Record<string, string>,
+  //     user: Record<string, string>,
+  //   } = {channel: {}, global: {}, server: {}, user: {}};
 
-    if (tagId) {
-      const response = await fetchTagVariables(context, tagId, {
-        channelId: context.channelId!,
-        guildId: context.guildId,
-        userId: context.userId,
-      });
-      for (let key in Object.keys(response)) {
-        const storageType = parseInt(key) as TagVariableStorageTypes;
-        switch (storageType) {
-          case TagVariableStorageTypes.CHANNEL: {
-            Object.assign(storage.channel, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GUILD: {
-            Object.assign(storage.server, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.USER: {
-            Object.assign(storage.user, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GLOBAL: {
-            Object.assign(storage.global, response[storageType]);
-          }; break;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     const response = await fetchTagVariables(context, tagId, {
+  //       channelId: context.channelId!,
+  //       guildId: context.guildId,
+  //       userId: context.userId,
+  //     });
+  //     for (let key in Object.keys(response)) {
+  //       const storageType = parseInt(key) as TagVariableStorageTypes;
+  //       switch (storageType) {
+  //         case TagVariableStorageTypes.CHANNEL: {
+  //           Object.assign(storage.channel, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GUILD: {
+  //           Object.assign(storage.server, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.USER: {
+  //           Object.assign(storage.user, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GLOBAL: {
+  //           Object.assign(storage.global, response[storageType]);
+  //         }; break;
+  //       }
+  //     }
+  //   }
 
-    tag.text += JSON.stringify(storage.server);
+  //   tag.text += JSON.stringify(storage.server);
 
-    return true;
-  },
+  //   return true;
+  // },
 
-  [TagFunctions.VARIABLES_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-    // {variablesuser}
+  // [TagFunctions.VARIABLES_USER]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+  //   // {variablesuser}
 
-    let tagId: string | null = null;
-    if (context.metadata && context.metadata.tag) {
-      tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
-    }
+  //   let tagId: string | null = null;
+  //   if (context.metadata && context.metadata.tag) {
+  //     tagId = (context.metadata.tag.reference_tag) ? context.metadata.tag.reference_tag.id : context.metadata.tag.id;
+  //   }
 
-    const storage: {
-      channel: Record<string, string>,
-      global: Record<string, string>,
-      server: Record<string, string>,
-      user: Record<string, string>,
-    } = {channel: {}, global: {}, server: {}, user: {}};
+  //   const storage: {
+  //     channel: Record<string, string>,
+  //     global: Record<string, string>,
+  //     server: Record<string, string>,
+  //     user: Record<string, string>,
+  //   } = {channel: {}, global: {}, server: {}, user: {}};
 
-    if (tagId) {
-      const response = await fetchTagVariables(context, tagId, {
-        channelId: context.channelId!,
-        guildId: context.guildId,
-        userId: context.userId,
-      });
-      for (let key in Object.keys(response)) {
-        const storageType = parseInt(key) as TagVariableStorageTypes;
-        switch (storageType) {
-          case TagVariableStorageTypes.CHANNEL: {
-            Object.assign(storage.channel, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GUILD: {
-            Object.assign(storage.server, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.USER: {
-            Object.assign(storage.user, response[storageType]);
-          }; break;
-          case TagVariableStorageTypes.GLOBAL: {
-            Object.assign(storage.global, response[storageType]);
-          }; break;
-        }
-      }
-    }
+  //   if (tagId) {
+  //     const response = await fetchTagVariables(context, tagId, {
+  //       channelId: context.channelId!,
+  //       guildId: context.guildId,
+  //       userId: context.userId,
+  //     });
+  //     for (let key in Object.keys(response)) {
+  //       const storageType = parseInt(key) as TagVariableStorageTypes;
+  //       switch (storageType) {
+  //         case TagVariableStorageTypes.CHANNEL: {
+  //           Object.assign(storage.channel, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GUILD: {
+  //           Object.assign(storage.server, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.USER: {
+  //           Object.assign(storage.user, response[storageType]);
+  //         }; break;
+  //         case TagVariableStorageTypes.GLOBAL: {
+  //           Object.assign(storage.global, response[storageType]);
+  //         }; break;
+  //       }
+  //     }
+  //   }
 
-    tag.text += JSON.stringify(storage.user);
+  //   tag.text += JSON.stringify(storage.user);
 
-    return true;
-  },
+  //   return true;
+  // },
 });
