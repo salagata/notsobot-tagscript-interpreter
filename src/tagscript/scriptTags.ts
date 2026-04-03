@@ -12,13 +12,13 @@ import vm from 'vm'
 
 import { bigIntGenerateBetween, bigIntMax, bigIntMin, convertToBigIntFloats, MLDiffusionModels, randomFromArray, TagGenerationModels, textToBoolean, traverseJSON } from "./utils";
 
-type ScriptTagStruct = Readonly<Record<string, (context: any, arg: string, tag: TagResult) => Promise<boolean>> | {
-  _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
-}>
+// type ScriptTagStruct = Readonly<Record<string, (context: DiscordContextLike, arg: string, tag: TagResult) => Promise<boolean>> | {
+//   _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
+// }>
 
 type DiscordContextLike = any;
 
-export const ScriptTags: ScriptTagStruct = Object.freeze({
+export const ScriptTags = Object.freeze({
   _code: async (context: DiscordContextLike, arg: string, tag: TagResult, language: string, version?: string | null): Promise<boolean> => {
     // // {js:code}
 
@@ -1900,10 +1900,10 @@ export const ScriptTags: ScriptTagStruct = Object.freeze({
     }
 
     if (key === PrivateVariables.FILES) {
-      const files = tag.files.map((file) => {
-        return {description: file.description, filename: file.filename};
-      });
-      tag.text += JSON.stringify(files);
+      // const files = tag.files.map((file) => {
+      //   return {description: file.description, filename: file.filename};
+      // });
+      // tag.text += JSON.stringify(files);
     } else if (key in tag.variables) {
       let value = tag.variables[key];
       if (typeof(value) === 'object') {

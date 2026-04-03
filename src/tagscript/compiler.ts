@@ -14,6 +14,7 @@ import * as Parameters from './parameters';
 import { TagFunctions, TagFunctionsToString } from './tagFunctions';
 import { ScriptTags } from './scriptTags';
 import { TagExitError } from "./exceptions";
+import { getCodeLanguage } from "./utils";
 
 export const TAG_IF_COMPARISONS = [
   TagIfComparisons.EQUAL,
@@ -313,30 +314,30 @@ export async function parse(
               if (!wasValid) {
                 tag.text += scriptBuffer;
               }
-            } else if (TagFunctionsToString.LOGICAL_GET_CHANNEL.includes(scriptName)) {
-              // do this separate because we dont want to parse args yet
-              const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_CHANNEL](context, arg, tag);
-              if (!wasValid) {
-                tag.text += scriptBuffer;
-              }
-            } else if (TagFunctionsToString.LOGICAL_GET_GLOBAL.includes(scriptName)) {
-              // do this separate because we dont want to parse args yet
-              const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_GLOBAL](context, arg, tag);
-              if (!wasValid) {
-                tag.text += scriptBuffer;
-              }
-            } else if (TagFunctionsToString.LOGICAL_GET_SERVER.includes(scriptName)) {
-              // do this separate because we dont want to parse args yet
-              const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_SERVER](context, arg, tag);
-              if (!wasValid) {
-                tag.text += scriptBuffer;
-              }
-            } else if (TagFunctionsToString.LOGICAL_GET_USER.includes(scriptName)) {
-              // do this separate because we dont want to parse args yet
-              const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_USER](context, arg, tag);
-              if (!wasValid) {
-                tag.text += scriptBuffer;
-              }
+            // } else if (TagFunctionsToString.LOGICAL_GET_CHANNEL.includes(scriptName)) {
+            //   // do this separate because we dont want to parse args yet
+            //   const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_CHANNEL](context, arg, tag);
+            //   if (!wasValid) {
+            //     tag.text += scriptBuffer;
+            //   }
+            // } else if (TagFunctionsToString.LOGICAL_GET_GLOBAL.includes(scriptName)) {
+            //   // do this separate because we dont want to parse args yet
+            //   const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_GLOBAL](context, arg, tag);
+            //   if (!wasValid) {
+            //     tag.text += scriptBuffer;
+            //   }
+            // } else if (TagFunctionsToString.LOGICAL_GET_SERVER.includes(scriptName)) {
+            //   // do this separate because we dont want to parse args yet
+            //   const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_SERVER](context, arg, tag);
+            //   if (!wasValid) {
+            //     tag.text += scriptBuffer;
+            //   }
+            // } else if (TagFunctionsToString.LOGICAL_GET_USER.includes(scriptName)) {
+            //   // do this separate because we dont want to parse args yet
+            //   const wasValid = await ScriptTags[TagFunctions.LOGICAL_GET_USER](context, arg, tag);
+            //   if (!wasValid) {
+            //     tag.text += scriptBuffer;
+            //   }
             } else if (TagFunctionsToString.LOGICAL_IF.includes(scriptName)) {
               // do this separate because we dont want to parse args yet
               const wasValid = await ScriptTags[TagFunctions.LOGICAL_IF](context, arg, tag);
@@ -371,11 +372,11 @@ export async function parse(
               if (!wasValid) {
                 tag.text += scriptBuffer;
               }
-            } else if (TagFunctionsToString.COMPONENTS_ON_TIMEOUT.includes(scriptName)) {
-              const wasValid = await ScriptTags[TagFunctions.COMPONENTS_ON_TIMEOUT](context, arg, tag);
-              if (!wasValid) {
-                tag.text += scriptBuffer;
-              }
+            // } else if (TagFunctionsToString.COMPONENTS_ON_TIMEOUT.includes(scriptName)) {
+            //   const wasValid = await ScriptTags[TagFunctions.COMPONENTS_ON_TIMEOUT](context, arg, tag);
+            //   if (!wasValid) {
+            //     tag.text += scriptBuffer;
+            //   }
             } else {
               // check the other tags now
               let codeLanguage = getCodeLanguage(scriptName); 
@@ -406,9 +407,9 @@ export async function parse(
 
               if (!found) {
                 for (let TAG_FUNCTION of Object.values(TagFunctions)) {
-                  if (TagFunctionsToString[TAG_FUNCTION].includes(scriptName)) {
+                  if ((TagFunctionsToString as any)[TAG_FUNCTION].includes(scriptName)) {
                     found = true;
-                    const wasValid = await (ScriptTags[TAG_FUNCTION] as any)(context, arg, tag);
+                    const wasValid = await ((ScriptTags as any)[TAG_FUNCTION] as any)(context, arg, tag);
                     if (!wasValid) {
                       tag.text += scriptBuffer;
                     }
@@ -580,7 +581,7 @@ export function resetTagLimits(tag: TagResult) {
   (variables as any)[PrivateVariables.TAG_EXECUTIONS] = 0;
   Object.assign(tag.variables, {
     [PrivateVariables.RESULTS]: Object.assign({}, tag.variables[PrivateVariables.RESULTS], {
-      [TagFunctions.ATTACHMENT]: undefined,
+//      [TagFunctions.ATTACHMENT]: undefined,
     }),
   });
 }

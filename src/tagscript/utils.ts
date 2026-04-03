@@ -168,6 +168,9 @@ export function convertToBigIntFloats(...args: Array<string>): [Array<bigint>, n
   return [values, maxDecimalPlaces];
 }
 
+export function getCodeLanguage(value?: string): {language: string, version: string | null} | null {
+  return null;
+}
 // Just a polyfill
 export enum MLDiffusionModels {
   FLUX_KLEIN = 'FLUX_KLEIN',
