@@ -1,11 +1,19 @@
 import { input, select } from '@inquirer/prompts';
 import * as ansi from 'ansi-colors'
+
+import { processMarkup } from "./markup"
 import type { TagResult } from '../tagscript/tagscript.model'
 
 export function renderTagResult(tag: TagResult, markup = true) {
-    // Simple Text
-    console.log(tag.text);
+    
+    if(markup) {
+        console.log(processMarkup(tag.text))        
+    } else {
+        // Simple Text
+        console.log(tag.text);
+    }
 
+    // TODO: Components, Embeds, Pages, Attachments
     // Components (Button.style is done with 'ansi-colors')
     // select({
     //  message: 'Select an option',
