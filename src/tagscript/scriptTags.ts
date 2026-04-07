@@ -8,15 +8,17 @@ import * as Parameters from "./parameters"
 
 import MiniSearch from "minisearch";
 import * as cheerio from 'cheerio';
-import vm from 'vm'
+import vm from 'vm';
 
 import { bigIntGenerateBetween, bigIntMax, bigIntMin, convertToBigIntFloats, MLDiffusionModels, randomFromArray, TagGenerationModels, textToBoolean, traverseJSON } from "./utils";
+
+import type { DiscordContextLike } from "./discord/context";
+import { requestGuildContext } from "./context";
 
 // type ScriptTagStruct = Readonly<Record<string, (context: DiscordContextLike, arg: string, tag: TagResult) => Promise<boolean>> | {
 //   _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
 // }>
 
-type DiscordContextLike = any;
 
 export const ScriptTags = Object.freeze({
   _code: async (context: DiscordContextLike, arg: string, tag: TagResult, language: string, version?: string | null): Promise<boolean> => {
@@ -1317,17 +1319,18 @@ export const ScriptTags = Object.freeze({
     return true;
   },
 
-  // [TagFunctions.GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
-  //   // {guild}
-  //   // todo: {guild:178313653177548800}
+  [TagFunctions.GUILD]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+    // {guild}
+    // todo: {guild:178313653177548800}
+    requestGuildContext(context);
 
-  //   if (context.guild) {
-  //     tag.text += context.guild.name;
-  //   } else {
-  //     tag.text += 'Direct Message';
-  //   }
-  //   return true;
-  // },
+    if (context.guild) {
+      tag.text += context.guild.name;
+    } else {
+      tag.text += 'Direct Message';
+    }
+    return true;
+  },
 
   // [TagFunctions.GUILD_COUNT]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
   //   // {guildcount}

@@ -47,6 +47,9 @@ program.description('Run a file or the entry-point specified in the project conf
   .option('-f, --file <filePaths...>', 'Set an argument, simulating an argument being passed to the call (collector)')
   .option('--debug',"For debugging, shows the Object Tag Result instead of rendering it")
   .option('--no-markup',"Disable Markup Options")
+  .option('--ctx, --context',"Where is the tag being executed, \"dm\" for bot's direct messages, \"guild\" for a guild, \"private\" for private channels")
+  .option('--max, --max-attachment-size <size>',"Specifies the max attachment size, Infinity if not specified", "Infinity")
+  .option('--gc, --guild-context <filePathOrJSON>',"Provide a guild context to enable features that require a guild context, not avaiable if context is not \"guild\".")
   .action(runScript)
 
 program.parseAsync(process.argv);

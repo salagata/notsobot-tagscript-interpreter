@@ -5,12 +5,15 @@ import { parse, TagLimitDefaults } from '../tagscript/compiler';
 import { renderTagResult } from "../renderer/renderer";
 
 import type { ProjectStructure } from './project.model';
+import { DiscordContextLike } from '../tagscript/discord/context';
 
 interface TagRunOptions {
     argument: string[],
     file: string[],
     debug: boolean,
     markup: boolean,
+    maxAttachmentSize: number,
+    guildContext: any,
 }
 
 async function getProjectFileObject(): Promise<ProjectStructure> {
@@ -44,6 +47,21 @@ async function resolveFilePath(file: string): Promise<string> {
     throw lastError;
 }
 
+async function resolveFileJSON(filePathOrJSON: string) {
+    let obj: any;
+    try {
+        obj = JSON.parse(filePathOrJSON);
+    } catch (err) {
+        // is not json and is a filepath
+        try {
+            obj = JSON.parse(await fs.readFile(filePathOrJSON,"utf-8"));
+        } catch (error) {
+            throw error
+        }
+    }
+    return obj
+}
+
 export async function runScript(fileName: string, options: TagRunOptions) {
     let file = fileName;
     let script: string = "";
@@ -63,12 +81,18 @@ export async function runScript(fileName: string, options: TagRunOptions) {
         }
     }
 
+    const tagContext: DiscordContextLike = {
+        maxAttachmentSize: Number(options.maxAttachmentSize),
+    };
+
+    if(options?.guildContext) {
+        tagContext.guild = await resolveFileJSON(options.guildContext)
+    }
+
     const tagArguments = (options?.argument ?? []).map(a => '"' + a + '"').join(" ");
     const tagFiles = options?.file ?? [];
     // Testing purposes Only
-    const tag = await parse({
-        guild: "Reisen's gang",
-    }, script, tagArguments);
+    const tag = await parse(tagContext, script, tagArguments);
     
     if(options.debug) {
         console.log(tag);

@@ -16,6 +16,8 @@ import { ScriptTags } from './scriptTags';
 import { TagExitError } from "./exceptions";
 import { getCodeLanguage } from "./utils";
 
+import type { DiscordContextLike } from "./discord/context";
+
 export const TAG_IF_COMPARISONS = [
   TagIfComparisons.EQUAL,
   TagIfComparisons.EQUAL_NOT,
@@ -112,7 +114,7 @@ export const TagLimitDefaults: TagLimits = Object.freeze({
 // }
 
 export async function parse(
-  context: any,
+  context: DiscordContextLike,
   value: string,
   args: string = '',
   variables: TagVariables = Object.create(null),
