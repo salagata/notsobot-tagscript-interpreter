@@ -1,11 +1,12 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import { parse, TagLimitDefaults } from '../tagscript/compiler';
+import { parse, TagLimitDefaults, TagWithoutLimits } from '../tagscript/compiler';
 import { renderTagResult } from "../renderer/renderer";
 
 import type { ProjectStructure } from './project.model';
 import { DiscordContextLike } from '../tagscript/discord/context';
+import { TagLimits } from '../tagscript/tagscript.model';
 
 interface TagRunOptions {
     argument: string[],
@@ -14,6 +15,7 @@ interface TagRunOptions {
     markup: boolean,
     maxAttachmentSize: number,
     guildContext: any,
+    tagLimits: string | boolean
 }
 
 async function getProjectFileObject(): Promise<ProjectStructure> {
@@ -91,8 +93,16 @@ export async function runScript(fileName: string, options: TagRunOptions) {
 
     const tagArguments = (options?.argument ?? []).map(a => '"' + a + '"').join(" ");
     const tagFiles = options?.file ?? [];
+
+    let tagLimits: TagLimits;
+    if(options.tagLimits === false) {
+        tagLimits = TagWithoutLimits;
+    } else {
+        const limits = await resolveFileJSON((options.tagLimits as string));
+        tagLimits = Object.freeze(Object.assign(Object.assign({},TagLimitDefaults), limits));
+    }
     // Testing purposes Only
-    const tag = await parse(tagContext, script, tagArguments);
+    const tag = await parse(tagContext, script, tagArguments, undefined, undefined, tagLimits);
     
     if(options.debug) {
         console.log(tag);

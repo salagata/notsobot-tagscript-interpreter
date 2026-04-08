@@ -6,6 +6,7 @@ import path from 'path';
 
 import { createNewProject } from '../nsb/new';
 import { runScript } from '../nsb/run';
+import { TagLimitDefaults } from '../tagscript/compiler';
 
 const program = new Command();
 
@@ -50,6 +51,9 @@ program.description('Run a file or the entry-point specified in the project conf
   .option('--ctx, --context',"Where is the tag being executed, \"dm\" for bot's direct messages, \"guild\" for a guild, \"private\" for private channels")
   .option('--max, --max-attachment-size <size>',"Specifies the max attachment size, Infinity if not specified", "Infinity")
   .option('--gc, --guild-context <filePathOrJSON>',"Provide a guild context to enable features that require a guild context, not avaiable if context is not \"guild\".")
+//  .option('-v, --variables <filePathOrJSON>')
+  .option('--tag-limits <filePathOrJSON>',"Optional pre-defined tag limits",JSON.stringify(TagLimitDefaults))
+  .option('--no-tag-limits',"Removes the tag limits")
   .action(runScript)
 
 program.parseAsync(process.argv);
