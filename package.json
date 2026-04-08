@@ -1,6 +1,6 @@
 {
   "name": "notsobot-tagscript-interpreter",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "The NotSoBot TagScript Interpreter, with the discord context and it's dependences contained. A CLI to interact in the context, and a compiler.",
   "main": "index.js",
   "scripts": {
