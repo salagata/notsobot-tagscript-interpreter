@@ -54,6 +54,7 @@ program.description('Run a file or the entry-point specified in the project conf
 //  .option('-v, --variables <filePathOrJSON>')
   .option('--tag-limits <filePathOrJSON>',"Optional pre-defined tag limits",JSON.stringify(TagLimitDefaults))
   .option('--no-tag-limits',"Removes the tag limits")
+  .option('--math',"Enables the Math Worker, which uses eval() as a temporal solution for eval (DO NOT USE IN PRODUCTION, THE eval() WILL BE DELETED AS SOON AS POSIBLE)")
   .action(runScript)
 
 program.parseAsync(process.argv);

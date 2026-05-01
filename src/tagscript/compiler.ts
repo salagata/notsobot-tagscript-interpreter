@@ -141,7 +141,7 @@ export async function parse(
   value: string,
   args: string = '',
   variables: TagVariables = Object.create(null),
-  tagContext: any = Object.create(null),
+  tagContext: boolean,// any = Object.create(null),
   limits: Partial<TagLimits> = Object.create(null),
   shouldTrim: boolean = true,
 ): Promise<TagResult> {

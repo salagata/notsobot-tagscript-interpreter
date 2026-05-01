@@ -2515,7 +2515,11 @@ export const ScriptTags = Object.freeze({
 
     // TESTING PURPOSES ONLY, NO USE IN DEVELOPMENT
 
-    tag.text += eval(arg);
+    if(tag.context == true) {
+      tag.text += eval(arg);
+    } else {
+      throw new Error("Math Worker can't be initialized");
+    }
     // const equation = arg.trim();
 
     // const mathWorker = tag.context.mathWorker = tag.context.mathWorker || new MathWorker();
