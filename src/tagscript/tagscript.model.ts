@@ -1,4 +1,5 @@
 import { PrivateVariables, TagSettings } from './tagscript.constants'
+import { MathWorkerLike } from './mathWorker'
 
 export interface TagVariables {
   [PrivateVariables.AI_EXECUTIONS]: number,
@@ -54,5 +55,13 @@ export interface TagResult {
     text: string,
     variables: TagVariables,
     limits: Partial<TagLimits>,
-    context: any,
+    context: MathWorker,
+}
+export interface TagResultCompleteLimits extends TagResult {
+    limits: TagLimits,
+}
+
+export interface MathWorker {
+    working: boolean,
+    worker: MathWorkerLike,
 }

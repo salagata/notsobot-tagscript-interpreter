@@ -16,7 +16,7 @@ interface TagRunOptions {
     maxAttachmentSize: number,
     guildContext: any,
     tagLimits: string | boolean,
-    math: boolean
+    math?: boolean,
 }
 
 async function getProjectFileObject(): Promise<ProjectStructure> {
@@ -103,7 +103,7 @@ export async function runScript(fileName: string, options: TagRunOptions) {
         tagLimits = Object.freeze(Object.assign(Object.assign({},TagLimitDefaults), limits));
     }
     // Testing purposes Only
-    const tag = await parse(tagContext, script, tagArguments, undefined, options.math, tagLimits);
+    const tag = await parse(tagContext, script, tagArguments, undefined, undefined, tagLimits);
     
     if(options.debug) {
         console.log(tag);

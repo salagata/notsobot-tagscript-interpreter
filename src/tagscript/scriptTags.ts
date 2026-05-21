@@ -15,6 +15,8 @@ import { bigIntGenerateBetween, bigIntMax, bigIntMin, convertToBigIntFloats, MLD
 import type { DiscordContextLike } from "./discord/context";
 import { requestGuildContext } from "./context";
 
+import { MathWorkerLike } from "./mathWorker";
+
 // type ScriptTagStruct = Readonly<Record<string, (context: DiscordContextLike, arg: string, tag: TagResult) => Promise<boolean>> | {
 //   _code: (context: any, arg: string, tag: TagResult, language: string, version?: string | null) => Promise<boolean>
 // }>
@@ -171,7 +173,7 @@ export const ScriptTags = Object.freeze({
     //               }
     //             }
 
-    //             tag.variables[key] = String((variables as any)[key]).slice(0, tag.limits.MAX_VARIABLE_LENGTH);
+    //             tag.variables[key] = String((variables as any)[key]).slice(0, (tag.limits.MAX_VARIABLE_LENGTH as number));
     //           }
     //         }
 
@@ -1431,8 +1433,8 @@ export const ScriptTags = Object.freeze({
       if (isNaN(amount)) {
         return false;
       }
-      if (amount <= 0 || tag.limits.MAX_VARIABLE_LENGTH < amount) {
-        throw new Error(`Cannot repeat character less than 0 or more than ${tag.limits.MAX_VARIABLE_LENGTH} times`);
+      if (amount <= 0 || (tag.limits.MAX_VARIABLE_LENGTH as number) < amount) {
+        throw new Error(`Cannot repeat character less than 0 or more than ${(tag.limits.MAX_VARIABLE_LENGTH as number)} times`);
       }
       tag.text += TagSymbols.BRACKET_LEFT.repeat(amount);
     } else {
@@ -1451,8 +1453,8 @@ export const ScriptTags = Object.freeze({
       if (isNaN(amount)) {
         return false;
       }
-      if (amount <= 0 || tag.limits.MAX_VARIABLE_LENGTH < amount) {
-        throw new Error(`Cannot repeat character less than 0 or more than ${tag.limits.MAX_VARIABLE_LENGTH} times`);
+      if (amount <= 0 || (tag.limits.MAX_VARIABLE_LENGTH as number) < amount) {
+        throw new Error(`Cannot repeat character less than 0 or more than ${(tag.limits.MAX_VARIABLE_LENGTH as number)} times`);
       }
       tag.text += TagSymbols.BRACKET_RIGHT.repeat(amount);
     } else {
@@ -1471,8 +1473,8 @@ export const ScriptTags = Object.freeze({
       if (isNaN(amount)) {
         return false;
       }
-      if (amount <= 0 || tag.limits.MAX_VARIABLE_LENGTH < amount) {
-        throw new Error(`Cannot repeat character less than 0 or more than ${tag.limits.MAX_VARIABLE_LENGTH} times`);
+      if (amount <= 0 || (tag.limits.MAX_VARIABLE_LENGTH as number) < amount) {
+        throw new Error(`Cannot repeat character less than 0 or more than ${(tag.limits.MAX_VARIABLE_LENGTH as number)} times`);
       }
       tag.text += '\u200b'.repeat(amount);
     } else {
@@ -1491,8 +1493,8 @@ export const ScriptTags = Object.freeze({
       if (isNaN(amount)) {
         return false;
       }
-      if (amount <= 0 || tag.limits.MAX_VARIABLE_LENGTH < amount) {
-        throw new Error(`Cannot repeat character less than 0 or more than ${tag.limits.MAX_VARIABLE_LENGTH} times`);
+      if (amount <= 0 || (tag.limits.MAX_VARIABLE_LENGTH as number) < amount) {
+        throw new Error(`Cannot repeat character less than 0 or more than ${(tag.limits.MAX_VARIABLE_LENGTH as number)} times`);
       }
       tag.text += TagSymbols.SPLITTER_ARGUMENT.repeat(amount);
     } else {
@@ -1511,8 +1513,8 @@ export const ScriptTags = Object.freeze({
       if (isNaN(amount)) {
         return false;
       }
-      if (amount <= 0 || tag.limits.MAX_VARIABLE_LENGTH < amount) {
-        throw new Error(`Cannot repeat character less than 0 or more than ${tag.limits.MAX_VARIABLE_LENGTH} times`);
+      if (amount <= 0 || (tag.limits.MAX_VARIABLE_LENGTH as number) < amount) {
+        throw new Error(`Cannot repeat character less than 0 or more than ${(tag.limits.MAX_VARIABLE_LENGTH as number)} times`);
       }
       tag.text += TagSymbols.SPLITTER_FUNCTION.repeat(amount);
     } else {
@@ -1805,7 +1807,7 @@ export const ScriptTags = Object.freeze({
     if (arg.startsWith(PRIVATE_VARIABLE_PREFIX)) {
       throw new Error(`Tried to delete a private variable, cannot start with '${PRIVATE_VARIABLE_PREFIX}'.`);
     }
-    if (tag.limits.MAX_VARIABLE_KEY_LENGTH < arg.length) {
+    if ((tag.limits.MAX_VARIABLE_KEY_LENGTH as number) < arg.length) {
       throw new Error(`Variable cannot be more than ${tag.limits.MAX_VARIABLE_KEY_LENGTH} characters`);
     }
     delete tag.variables[arg];
@@ -1898,7 +1900,7 @@ export const ScriptTags = Object.freeze({
     }
 
     key = key.trim();
-    if (tag.limits.MAX_VARIABLE_KEY_LENGTH < key.length) {
+    if ((tag.limits.MAX_VARIABLE_KEY_LENGTH as number) < key.length) {
       throw new Error(`Variable cannot be more than ${tag.limits.MAX_VARIABLE_KEY_LENGTH} characters`);
     }
 
@@ -2351,17 +2353,17 @@ export const ScriptTags = Object.freeze({
       throw new Error(`Tried to set a private variable, cannot start with '${PRIVATE_VARIABLE_PREFIX}'.`);
     }
 
-    if (tag.limits.MAX_VARIABLE_KEY_LENGTH < key.length) {
+    if ((tag.limits.MAX_VARIABLE_KEY_LENGTH as number) < key.length) {
       throw new Error(`Variable cannot be more than ${tag.limits.MAX_VARIABLE_KEY_LENGTH} characters`);
     }
 
     if (!(key in tag.variables)) {
-      if (tag.limits.MAX_VARIABLES <= Object.keys(tag.variables).filter((key) => !key.startsWith(PRIVATE_VARIABLE_PREFIX)).length) {
-        throw new Error(`Reached max variable amount (Max ${tag.limits.MAX_VARIABLES.toLocaleString()} Variables)`);
+      if ((tag.limits.MAX_VARIABLES as number) <= Object.keys(tag.variables).filter((key) => !key.startsWith(PRIVATE_VARIABLE_PREFIX)).length) {
+        throw new Error(`Reached max variable amount (Max ${(tag.limits.MAX_VARIABLES as number).toLocaleString()} Variables)`);
       }
     }
 
-    tag.variables[key] = (value || '').slice(0, tag.limits.MAX_VARIABLE_LENGTH).trim();
+    tag.variables[key] = (value || '').slice(0, (tag.limits.MAX_VARIABLE_LENGTH as number)).trim();
 
     return true;
   },
@@ -2513,13 +2515,10 @@ export const ScriptTags = Object.freeze({
   [TagFunctions.MATH]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {math:5+5}
 
-    // TESTING PURPOSES ONLY, NO USE IN DEVELOPMENT
-
-    if(tag.context == true) {
-      tag.text += eval(arg);
-    } else {
-      throw new Error("Math Worker can't be initialized");
+    if(tag.context.working == false) {
+      tag.context.worker = new MathWorkerLike();
     }
+    tag.text += tag.context.worker.eval(arg);
     // const equation = arg.trim();
 
     // const mathWorker = tag.context.mathWorker = tag.context.mathWorker || new MathWorker();

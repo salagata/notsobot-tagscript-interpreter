@@ -6,7 +6,7 @@
 // tagContext: For now just the MathWorker
 // limits: Limits
 // shouldTrim: just asking if trim
-import type { TagLimits, TagVariables, TagResult } from "./tagscript.model"
+import type { TagLimits, TagVariables, TagResult, TagResultCompleteLimits, MathWorker } from "./tagscript.model"
 
 import { ATTACHMENT_URL_REGEX, PrivateVariables, REGEX_ARGUMENT_SPLITTER, REGEX_ARGUMENT_SPLITTER_ESCAPE_REPLACEMENT, TagIfComparisons, TagSettings, TagSymbols } from "./tagscript.constants";
 import * as Parameters from './parameters';
@@ -141,7 +141,10 @@ export async function parse(
   value: string,
   args: string = '',
   variables: TagVariables = Object.create(null),
-  tagContext: boolean,// any = Object.create(null),
+  tagContext: MathWorker = {
+    working: false,
+    worker: Object.create(null)
+  },
   limits: Partial<TagLimits> = Object.create(null),
   shouldTrim: boolean = true,
 ): Promise<TagResult> {
@@ -283,13 +286,13 @@ export async function parse(
       position = nextLeftBracket;
     }
 
-    increaseAIExecutions(tag, 0);
-    increaseAPIManipulations(tag, 0);
-    increaseComponentExecutions(tag, 0);
-    increaseNetworkRequests(tag, 0);
-    increaseNetworkRequestsML(tag, 0);
-    increaseNetworkRequestsOpenAI(tag, 0);
-    increaseTagExecutions(tag, 0);
+    increaseAIExecutions((tag as TagResultCompleteLimits), 0);
+    increaseAPIManipulations((tag as TagResultCompleteLimits), 0);
+    increaseComponentExecutions((tag as TagResultCompleteLimits), 0);
+    increaseNetworkRequests((tag as TagResultCompleteLimits), 0);
+    increaseNetworkRequestsML((tag as TagResultCompleteLimits), 0);
+    increaseNetworkRequestsOpenAI((tag as TagResultCompleteLimits), 0);
+    increaseTagExecutions((tag as TagResultCompleteLimits), 0);
 
     // add network checks
     try {
@@ -479,7 +482,7 @@ export async function parse(
 }
 
 
-export function increaseAIExecutions(tag: TagResult, amount: number = 1) {
+export function increaseAIExecutions(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.AI_EXECUTIONS] += amount;
   }
@@ -489,7 +492,7 @@ export function increaseAIExecutions(tag: TagResult, amount: number = 1) {
 }
 
 
-export function increaseAPIManipulations(tag: TagResult, amount: number = 1) {
+export function increaseAPIManipulations(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.API_MANIPULATIONS] += amount;
   }
@@ -499,7 +502,7 @@ export function increaseAPIManipulations(tag: TagResult, amount: number = 1) {
 }
 
 
-export function increaseComponentExecutions(tag: TagResult, amount: number = 1) {
+export function increaseComponentExecutions(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.COMPONENT_EXECUTIONS] += amount;
   }
@@ -509,7 +512,7 @@ export function increaseComponentExecutions(tag: TagResult, amount: number = 1) 
 }
 
 
-export function increaseNetworkRequests(tag: TagResult, amount: number = 1) {
+export function increaseNetworkRequests(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.NETWORK_REQUESTS] += amount;
   }
@@ -519,7 +522,7 @@ export function increaseNetworkRequests(tag: TagResult, amount: number = 1) {
 }
 
 
-export function increaseNetworkRequestsML(tag: TagResult, amount: number = 1) {
+export function increaseNetworkRequestsML(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.NETWORK_REQUESTS_ML] += amount;
   }
@@ -529,7 +532,7 @@ export function increaseNetworkRequestsML(tag: TagResult, amount: number = 1) {
 }
 
 
-export function increaseNetworkRequestsOpenAI(tag: TagResult, amount: number = 1) {
+export function increaseNetworkRequestsOpenAI(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.NETWORK_REQUESTS_OPENAI] += amount;
   }
@@ -539,7 +542,7 @@ export function increaseNetworkRequestsOpenAI(tag: TagResult, amount: number = 1
 }
 
 
-export function increaseTagExecutions(tag: TagResult, amount: number = 1) {
+export function increaseTagExecutions(tag: TagResultCompleteLimits, amount: number = 1) {
   if (amount) {
     tag.variables[PrivateVariables.TAG_EXECUTIONS] += amount;
   }

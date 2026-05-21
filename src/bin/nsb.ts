@@ -45,7 +45,7 @@ program.command('init')
 program.description('Run a file or the entry-point specified in the project config, with NotSoBot TagScript')
   .argument("[file]","Name of the file, the entry-point specified in the project config if no specified",".")
   .option('-a, --argument <arguments...>', 'Set an argument, simulating an argument being passed to the call (collector)')
-  .option('-f, --file <filePaths...>', 'Set an argument, simulating an argument being passed to the call (collector)')
+  .option('-f, --file <filePaths...>', 'Set a file, simulating an attachment being passed to the call (collector)')
   .option('--debug',"For debugging, shows the Object Tag Result instead of rendering it")
   .option('--no-markup',"Disable Markup Options")
   .option('--ctx, --context',"Where is the tag being executed, \"dm\" for bot's direct messages, \"guild\" for a guild, \"private\" for private channels")
@@ -54,7 +54,7 @@ program.description('Run a file or the entry-point specified in the project conf
 //  .option('-v, --variables <filePathOrJSON>')
   .option('--tag-limits <filePathOrJSON>',"Optional pre-defined tag limits",JSON.stringify(TagLimitDefaults))
   .option('--no-tag-limits',"Removes the tag limits")
-  .option('--math',"Enables the Math Worker, which uses eval() as a temporal solution for eval (DO NOT USE IN PRODUCTION, THE eval() WILL BE DELETED AS SOON AS POSIBLE)")
+  .option('--math',"Enables the Math Worker, which uses node:vm as a temporal solution for eval (This option will be removed in a future)")
   .action(runScript)
 
 program.parseAsync(process.argv);
