@@ -143,7 +143,8 @@ export async function parse(
   variables: TagVariables = Object.create(null),
   tagContext: MathWorker = {
     working: false,
-    worker: Object.create(null)
+    mathWorker: Object.create(null),
+    consoleEnabled: false
   },
   limits: Partial<TagLimits> = Object.create(null),
   shouldTrim: boolean = true,

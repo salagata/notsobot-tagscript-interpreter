@@ -2516,9 +2516,9 @@ export const ScriptTags = Object.freeze({
     // {math:5+5}
 
     if(tag.context.working == false) {
-      tag.context.worker = new MathWorkerLike();
+      tag.context.mathWorker = new MathWorkerLike();
     }
-    tag.text += tag.context.worker.eval(arg);
+    tag.text += tag.context.mathWorker.eval(arg);
     // const equation = arg.trim();
 
     // const mathWorker = tag.context.mathWorker = tag.context.mathWorker || new MathWorker();
@@ -5242,4 +5242,42 @@ export const ScriptTags = Object.freeze({
 
   //   return true;
   // },
+  [TagFunctions.CONSOLE_LOG]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+    // {log:message}
+
+    const message = arg;
+    if (!tag.context.consoleEnabled || !message) {
+      return false;
+    }
+
+    console.log(message);
+
+    return true;
+  },
+  
+  [TagFunctions.CONSOLE_WARN]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+    // {warn:message}
+
+    const message = arg;
+    if (!tag.context.consoleEnabled || !message) {
+      return false;
+    }
+
+    console.warn(message);
+
+    return true;
+  },
+  
+  [TagFunctions.CONSOLE_ERROR]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+    // {error:message}
+
+    const message = arg;
+    if (!tag.context.consoleEnabled || !message) {
+      return false;
+    }
+
+    console.error(message);
+
+    return true;
+  },
 });

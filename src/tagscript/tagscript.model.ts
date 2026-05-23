@@ -63,5 +63,6 @@ export interface TagResultCompleteLimits extends TagResult {
 
 export interface MathWorker {
     working: boolean,
-    worker: MathWorkerLike,
+    mathWorker: MathWorkerLike,
+    consoleEnabled: boolean,
 }

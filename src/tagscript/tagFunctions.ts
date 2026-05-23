@@ -170,6 +170,9 @@ export enum TagFunctions {
   // VARIABLES_GLOBAL = 'VARIABLES_GLOBAL',
   // VARIABLES_SERVER = 'VARIABLES_SERVER',
   // VARIABLES_USER = 'VARIABLES_USER',
+  CONSOLE_LOG = 'CONSOLE_LOG',
+  CONSOLE_WARN = 'CONSOLE_WARN',
+  CONSOLE_ERROR = 'CONSOLE_ERROR'
 }
 
 
@@ -346,4 +349,7 @@ export const TagFunctionsToString = Object.freeze({
   // [TagFunctions.VARIABLES_GLOBAL]: ['variablesglobal'],
   // [TagFunctions.VARIABLES_SERVER]: ['variablesserver'],
   // [TagFunctions.VARIABLES_USER]: ['variablesuser'],
+  [TagFunctions.CONSOLE_LOG]: ['log'],
+  [TagFunctions.CONSOLE_WARN]: ['warn'],
+  [TagFunctions.CONSOLE_ERROR]: ['error'],
 });

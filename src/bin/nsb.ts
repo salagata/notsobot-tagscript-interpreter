@@ -55,6 +55,7 @@ program.description('Run a file or the entry-point specified in the project conf
   .option('--tag-limits <filePathOrJSON>',"Optional pre-defined tag limits",JSON.stringify(TagLimitDefaults))
   .option('--no-tag-limits',"Removes the tag limits")
   .option('--math',"Enables the Math Worker, which uses node:vm as a temporal solution for eval (This option will be removed in a future)")
+  .option('--console, --use-console',"Enables the commands {log}, {warn} and {error} used for debugging (Not avaiable in the normal NotSoBot TagScript)")
   .action(runScript)
 
 program.parseAsync(process.argv);
