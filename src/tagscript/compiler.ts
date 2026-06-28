@@ -727,19 +727,6 @@ export async function parseValue(
   return value.trim();
 }
 
-parseValue({maxAttachmentSize:Infinity},{
-//    components: null, 
-    context: {
-    working: false,
-    mathWorker: Object.create(null),
-    consoleEnabled: false,
-    foreachLimit: false
-  }, 
-    limits: TagLimitDefaults, 
-    text: '', 
-    variables: Object.create(null)
-  },"{ignore:{e}}").then(x => {console.log(x)})
-
 export function normalizeTagResults(main: TagResult, other: TagResult, content: boolean = true): void {
   if (content) {
     main.text += other.text;
