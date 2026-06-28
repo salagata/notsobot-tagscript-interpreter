@@ -386,6 +386,12 @@ export async function parse(
               if (!wasValid) {
                 tag.text += scriptBuffer;
               }
+            } else if (TagFunctionsToString.LOGICAL_SET.includes(scriptName)) {
+              // do this separate because we dont want to parse args yet
+              const wasValid = await ScriptTags[TagFunctions.LOGICAL_SET](context, arg, tag);
+              if (!wasValid) {
+                tag.text += scriptBuffer;
+              }
             } else if (TagFunctionsToString.RNG_CHOOSE.includes(scriptName)) {
               // do this separate from below because we don't want our args parsed yet
               const wasValid = await ScriptTags[TagFunctions.RNG_CHOOSE](context, arg, tag);
@@ -720,6 +726,19 @@ export async function parseValue(
   }
   return value.trim();
 }
+
+parseValue({maxAttachmentSize:Infinity},{
+//    components: null, 
+    context: {
+    working: false,
+    mathWorker: Object.create(null),
+    consoleEnabled: false,
+    foreachLimit: false
+  }, 
+    limits: TagLimitDefaults, 
+    text: '', 
+    variables: Object.create(null)
+  },"{ignore:{e}}").then(x => {console.log(x)})
 
 export function normalizeTagResults(main: TagResult, other: TagResult, content: boolean = true): void {
   if (content) {
