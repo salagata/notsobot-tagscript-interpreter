@@ -65,4 +65,5 @@ export interface MathWorker {
     working: boolean,
     mathWorker: MathWorkerLike,
     consoleEnabled: boolean,
+    foreachLimit: boolean
 }

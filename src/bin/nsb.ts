@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('nsb')
   .description('NotSoBot TagScript Project Handler and TagScript Parser in a CLI ')
-  .version('0.0.1');
+  .version('0.3');
 
 // nsb init [name] 
 // -q, --quick : Answer yes to everything
@@ -56,6 +56,8 @@ program.description('Run a file or the entry-point specified in the project conf
   .option('--no-tag-limits',"Removes the tag limits")
   .option('--math',"Enables the Math Worker, which uses node:vm as a temporal solution for eval (This option will be removed in a future)")
   .option('--console, --use-console',"Enables the commands {log}, {warn} and {error} used for debugging (Not avaiable in the normal NotSoBot TagScript)")
+  .option('--override, --override-blank-output',"If enabled, if the parsed script at the end is void, or only contains whitespaces, it will not be rendered")
+  .option('--no-foreach-limit',"Disables the ForEach command limits (original limits are 200)")
   .action(runScript)
 
 program.parseAsync(process.argv);

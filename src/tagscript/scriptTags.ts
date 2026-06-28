@@ -1,7 +1,7 @@
 import { PRIVATE_VARIABLE_PREFIX, PrivateVariables, TagIfComparisons, TagSettings, TagSymbols } from "./tagscript.constants"; 
 import { TagFunctions, TagFunctionsToString } from "./tagFunctions";
 
-import { normalizeTagResults, parse, split, TAG_IF_COMPARISONS } from "./compiler";
+import { normalizeTagResults, parse, parseValue, split, TAG_IF_COMPARISONS } from "./compiler";
 import { TagResult } from "./tagscript.model";
 import { TagExitError } from "./exceptions";
 import * as Parameters from "./parameters"
@@ -1282,8 +1282,7 @@ export const ScriptTags = Object.freeze({
   [TagFunctions.EVAL]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
     // {eval:{args}}
 
-    const argParsed = await parse(context, arg, '', tag.variables, tag.context, tag.limits);
-    normalizeTagResults(tag, argParsed);
+    tag.text += await parseValue(context, tag, arg);
     return true;
   },
 
@@ -1291,13 +1290,7 @@ export const ScriptTags = Object.freeze({
     // {evalsilent:{args}}
 
     try {
-      let argParsed = await parse(context, arg, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, argParsed, false);
-
-      if (argParsed.text) {
-        argParsed = await parse(context, argParsed.text, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed, false);
-      }
+      tag.text += await parseValue(context, tag, arg);
     } catch(error) {
       
     }
@@ -1693,15 +1686,7 @@ export const ScriptTags = Object.freeze({
     for (let i = 0; i < conditionals.length; i++) {
       const conditional = conditionals[i];
 
-      let text: string = '';
-      if (conditional.includes(TagSymbols.BRACKET_LEFT)) {
-        const argParsed = await parse(context, conditional, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed, false);
-        text = argParsed.text;
-      } else {
-        text = conditional;
-      }
-
+      const text = await parseValue(context, tag, conditional);
       if (!text) {
         break;
       }
@@ -1715,6 +1700,7 @@ export const ScriptTags = Object.freeze({
   },
 
   [TagFunctions.LOGICAL_FOR_EACH]: async (context: DiscordContextLike, arg: string, tag: TagResult): Promise<boolean> => {
+    let limit = tag.context.foreachLimit ? 200 : Infinity;
     // {foreach:jsonarray|code}
 
     if (!arg.includes(TagSymbols.SPLITTER_ARGUMENT)) {
@@ -1727,12 +1713,8 @@ export const ScriptTags = Object.freeze({
     }
 
     let values: Array<[string, any]>;
-    if (text.includes(TagSymbols.BRACKET_LEFT)) {
-      const argParsed = await parse(context, text, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, argParsed, false);
-      text = argParsed.text;
-    }
 
+    text = await parseValue(context, tag, text);
     if (isNaN(parseInt(text))) {
       try {
         let object = JSON.parse(text);
@@ -1757,7 +1739,7 @@ export const ScriptTags = Object.freeze({
       }
     } else {
       const count = parseInt(text);
-      if (200 < count) {
+      if (limit < count) {
         throw new Error(`Cannot have a for loop that is less than 1 or bigger than 200.`);
       }
       values = Array.from({length: count}).map((x, i) => {
@@ -1769,34 +1751,32 @@ export const ScriptTags = Object.freeze({
       return true;
     }
 
-    if (200 < values.length) {
+    if (limit < values.length) {
       throw new Error(`Cannot have a for loop that is less than 1 or bigger than 200.`);
     }
 
-    const idx = tag.variables['idx'];
-    const valuex = tag.variables['valuex'];
+    const idx = tag.variables[PrivateVariables.ID_X];
+    const valuex = tag.variables[PrivateVariables.VALUE_X];
     for (let [key, value] of values) {
       let text: string = '';
       if (code.includes(TagSymbols.BRACKET_LEFT)) {
-        tag.variables['idx'] = String(key);
-        tag.variables['valuex'] = (typeof(value) === 'object') ? JSON.stringify(value) : String(value);
-        const argParsed = await parse(context, code, '', tag.variables, tag.context, tag.limits, false);
-        normalizeTagResults(tag, argParsed, false);
-        text = argParsed.text;
+        tag.variables[PrivateVariables.ID_X] = String(key);
+        tag.variables[PrivateVariables.VALUE_X] = (typeof(value) === 'object') ? JSON.stringify(value) : String(value);
+        text = await parseValue(context, tag, code);
       } else {
         text = code;
       }
       tag.text += text;
     }
     if (idx === undefined) {
-      delete tag.variables['idx'];
+      delete tag.variables[PrivateVariables.ID_X];
     } else {
-      tag.variables['idx'] = idx;
+      tag.variables[PrivateVariables.ID_X] = idx;
     }
     if (valuex === undefined) {
-      delete tag.variables['valuex'];
+      delete tag.variables[PrivateVariables.VALUE_X];
     } else {
-      tag.variables['valuex'] = idx;
+      tag.variables[PrivateVariables.VALUE_X] = idx;
     }
 
     return true;
@@ -1916,13 +1896,7 @@ export const ScriptTags = Object.freeze({
       }
       tag.text += value;
     } else if (defaultValue) {
-      if (defaultValue.includes(TagSymbols.BRACKET_LEFT)) {
-        const argParsed = await parse(context, defaultValue, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed, false);
-        tag.text += argParsed.text;
-      } else {
-        tag.text += defaultValue;
-      }
+      tag.text += await parseValue(context, tag, defaultValue);
     }
 
     return true;
@@ -2163,15 +2137,7 @@ export const ScriptTags = Object.freeze({
 
     const values: [string, string] = [value1, value2];
     for (let i in values) {
-      const x = values[i];
-      if (x.includes(TagSymbols.BRACKET_LEFT)) {
-        // parse it
-        const argParsed = await parse(context, x, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed, false);
-        values[i] = argParsed.text;
-      } else {
-        values[i] = x;
-      }
+      values[i] = await parseValue(context, tag, values[i]);
     }
 
     let compared: boolean | undefined;
@@ -2222,24 +2188,11 @@ export const ScriptTags = Object.freeze({
 
     {
       const text = (compared) ? then.slice(5) : (elseValue || '').slice(5);
-      if (text.includes(TagSymbols.BRACKET_LEFT)) {
-        // parse it
-        const argParsed = await parse(context, text, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed);
-      } else {
-        tag.text += text;
-      }
+      tag.text += await parseValue(context, tag, text);
     }
 
     if (finallyValue) {
-      const text = finallyValue;
-      if (text.includes(TagSymbols.BRACKET_LEFT)) {
-        // parse it
-        const argParsed = await parse(context, text, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed);
-      } else {
-        tag.text += text;
-      }
+      tag.text += await parseValue(context, tag, finallyValue);
     }
 
     return true;
@@ -2255,21 +2208,12 @@ export const ScriptTags = Object.freeze({
 
     const conditionals = split(arg);
     for (let conditional of conditionals) {
-      let text: string = '';
-      if (conditional.includes(TagSymbols.BRACKET_LEFT)) {
-        try {
-          const argParsed = await parse(context, conditional, '', tag.variables, tag.context, tag.limits);
-          normalizeTagResults(tag, argParsed, false);
-          text = argParsed.text;
-        } catch(error) {
-          // go to the next one if it errors
-          continue;
-        }
-      } else {
-        text = conditional;
+      try {
+        tag.text += await parseValue(context, tag, conditional);
+      } catch(error) {
+        // go to the next one if it errors
+        continue;
       }
-
-      tag.text += text;
       return true;
     }
 
@@ -2322,14 +2266,7 @@ export const ScriptTags = Object.freeze({
 
     const conditionals = split(arg);
     for (let conditional of conditionals) {
-      let text: string = '';
-      if (conditional.includes(TagSymbols.BRACKET_LEFT)) {
-        const argParsed = await parse(context, conditional, '', tag.variables, tag.context, tag.limits);
-        normalizeTagResults(tag, argParsed, false);
-        text = argParsed.text;
-      } else {
-        text = conditional;
-      }
+      const text = await parseValue(context, tag, conditional);
       if (text) {
         tag.text += text;
         return true;
@@ -2348,7 +2285,8 @@ export const ScriptTags = Object.freeze({
     }
 
     let [ key, value ] = split(arg, 2);
-    key = key.trim();
+
+    key = await parseValue(context, tag, key);
     if (key.startsWith(PRIVATE_VARIABLE_PREFIX)) {
       throw new Error(`Tried to set a private variable, cannot start with '${PRIVATE_VARIABLE_PREFIX}'.`);
     }
@@ -2363,7 +2301,8 @@ export const ScriptTags = Object.freeze({
       }
     }
 
-    tag.variables[key] = (value || '').slice(0, (tag.limits.MAX_VARIABLE_LENGTH as number)).trim();
+    value = await parseValue(context, tag, value);
+    tag.variables[key] = value.slice(0, tag.limits.MAX_VARIABLE_LENGTH).trim();
 
     return true;
   },
@@ -3778,13 +3717,7 @@ export const ScriptTags = Object.freeze({
       value = arg;
     }
 
-    if (value.includes(TagSymbols.BRACKET_LEFT)) {
-      // parse it
-      const argParsed = await parse(context, value, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, argParsed);
-    } else {
-      tag.text += value;
-    }
+    tag.text += await parseValue(context, tag, value);
 
     return true;
   },
@@ -4074,22 +4007,12 @@ export const ScriptTags = Object.freeze({
       return false;
     }
 
-    let [ string, ...textParts ] = split(arg);
-    let text: string = textParts.join(TagSymbols.SPLITTER_ARGUMENT);
+    let [ indexValue, text ] = split(arg, 2);
 
-    {
-      const parsed = await parse(context, string, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, parsed, false);
-      string = parsed.text.trim();
-    }
+    indexValue = await parseValue(context, tag, indexValue);
+    text = await parseValue(context, tag, text);
 
-    {
-      const parsed = await parse(context, text, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, parsed, false);
-      text = parsed.text.trim();
-    }
-
-    tag.text += text.indexOf(string);
+    tag.text += text.indexOf(indexValue);
 
     return true;
   },
@@ -4398,39 +4321,26 @@ export const ScriptTags = Object.freeze({
       return false;
     }
 
-    const [ text, startText, endText ] = split(arg);
-    if (text === undefined || startText === undefined) {
+    const [ text, startText, endText ] = split(arg, 3);
+    if (!text || !startText) {
       return false;
     }
 
-    let start: number;
-    {
-      const parsed = await parse(context, startText, '', tag.variables, tag.context, tag.limits);
-      normalizeTagResults(tag, parsed, false);
-
-      start = parseInt(parsed.text.trim());
-      if (isNaN(start)) {
-        return false;
-      }
+    const start = parseInt(await parseValue(context, tag, startText));
+    if (isNaN(start)) {
+      return false;
     }
 
     let end: number | undefined;
     if (endText !== undefined) {
-      const parsed = await parse(context, endText, '', tag.variables, tag.context, tag.limits);
-      end = parseInt(parsed.text.trim());
-      // for (let file of parsed.files) {
-      //   tag.files.push(file);
-      // }
+      end = await parseInt(await parseValue(context, tag, endText));
       if (isNaN(end)) {
         return false;
       }
     }
 
-    // parse it
-    const argParsed = await parse(context, text, '', tag.variables, tag.context, tag.limits);
-    normalizeTagResults(tag, argParsed, false);
-
-    tag.text += argParsed.text.trim().substring(start, end);
+    const parsedText = await parseValue(context, tag, text);
+    tag.text += parsedText.substring(start, end);
 
     return true;
   },

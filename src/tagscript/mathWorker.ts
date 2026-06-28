@@ -10,5 +10,3 @@ export class MathWorkerLike {
         return vm.runInContext(exp, this.context)
     }
 }
-
-const myWorker = new MathWorkerLike();

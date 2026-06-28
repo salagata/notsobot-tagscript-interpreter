@@ -144,7 +144,8 @@ export async function parse(
   tagContext: MathWorker = {
     working: false,
     mathWorker: Object.create(null),
-    consoleEnabled: false
+    consoleEnabled: false,
+    foreachLimit: false
   },
   limits: Partial<TagLimits> = Object.create(null),
   shouldTrim: boolean = true,
@@ -414,11 +415,10 @@ export async function parse(
                 tag.variables[PrivateVariables.IS_FROM_CHILD_PARSING] = 1;
               }
 
-              const argParsed = await parse(context, arg, '', tag.variables, tag.context, tag.limits);
-              normalizeTagResults(tag, argParsed, false);
-
-              if (arg !== argParsed.text) {
-                arg = argParsed.text;
+              
+              const text = await parseValue(context, tag, arg);
+              if (arg !== text) {
+                arg = text;
                 const firstSplitter = scriptBuffer.indexOf(TagSymbols.SPLITTER_FUNCTION);
                 if (firstSplitter !== -1) {
                   scriptBuffer = scriptBuffer.slice(0, firstSplitter) + TagSymbols.SPLITTER_FUNCTION + arg + TagSymbols.BRACKET_RIGHT;
@@ -708,6 +708,18 @@ function parseInnerScript(value: string, shouldTrim: boolean = true): [string, s
   return [scriptName.toLowerCase(), arg];
 }
 
+export async function parseValue(
+  context: DiscordContextLike,
+  tag: TagResult,
+  value: string,
+): Promise<string> {
+  if (value.includes(TagSymbols.BRACKET_LEFT)) {
+    const argParsed = await parse(context, value, '', tag.variables, tag.context, tag.limits);
+    normalizeTagResults(tag, argParsed, false);
+    return argParsed.text;
+  }
+  return value.trim();
+}
 
 export function normalizeTagResults(main: TagResult, other: TagResult, content: boolean = true): void {
   if (content) {

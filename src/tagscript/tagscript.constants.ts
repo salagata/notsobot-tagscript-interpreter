@@ -48,6 +48,9 @@ export enum PrivateVariables {
   RESULTS = '__results',
   SETTINGS = '__settings',
   TAG_EXECUTIONS = '__tagExecutions',
+  VALUES = '__values',
+  ID_X = 'idx',
+  VALUE_X = 'valuex',
 }
 
 export enum TagIfComparisons {

@@ -17,7 +17,9 @@ interface TagRunOptions {
     guildContext: any,
     tagLimits: string | boolean,
     useConsole: boolean,
+    overrideBlankOutput?: boolean,
     math?: boolean,
+    foreachLimit: boolean,
 }
 
 async function getProjectFileObject(): Promise<ProjectStructure> {
@@ -108,12 +110,13 @@ export async function runScript(fileName: string, options: TagRunOptions) {
         consoleEnabled: options.useConsole,
         working: false,
         mathWorker: Object.create(null),
+        foreachLimit: options.foreachLimit,
     }, tagLimits);
     
     if(options.debug) {
         console.log(tag);
     } else {
-        renderTagResult(tag,options.markup);
+        renderTagResult(tag,options.markup, options.overrideBlankOutput);
     }
 
 }

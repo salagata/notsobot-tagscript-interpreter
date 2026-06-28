@@ -4,13 +4,21 @@ import * as ansi from 'ansi-colors'
 import { processMarkup } from "./markup"
 import type { TagResult } from '../tagscript/tagscript.model'
 
-export function renderTagResult(tag: TagResult, markup = true) {
+export function renderTagResult(tag: TagResult, markup = true, override = false) {
     
     if(markup) {
-        console.log(processMarkup(tag.text))        
+        if(override) {
+            console.log(processMarkup(tag.text.trim()));
+        } else {
+            console.log(processMarkup(tag.text));
+        }
     } else {
         // Simple Text
-        console.log(tag.text);
+        if(override) {
+            console.log(tag.text.trim());
+        } else {
+            console.log(tag.text);
+        }
     }
 
     // TODO: Components, Embeds, Pages, Attachments
